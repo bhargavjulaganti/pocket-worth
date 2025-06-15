@@ -1,5 +1,13 @@
+export enum UtilityName {
+  DTE = "DTE",
+  ConsumersEnergy = "ConsumersEnergy",
+  Internet = "Internet",
+  Mobile = "Mobile",
+  Water = "Water"
+}
+
 export type UtilityRow = {
-  Name: string;
+  Name: UtilityName;
   January: number | "";
   February: number | "";
   March: number | "";
@@ -16,7 +24,7 @@ export type UtilityRow = {
 
 export const utilitiesData2025: UtilityRow[] = [
   {
-    Name: "DTE",
+    Name: UtilityName.DTE,
     January: 97.05,
     February: 116.71,
     March: 109.39,
@@ -31,7 +39,7 @@ export const utilitiesData2025: UtilityRow[] = [
     December: ""
   },
   {
-    Name: "ConsumersEnergy",
+    Name: UtilityName.ConsumersEnergy,
     January: 122.86,
     February: 159.72,
     March: 132.23,
@@ -46,7 +54,7 @@ export const utilitiesData2025: UtilityRow[] = [
     December: ""
   },
   {
-    Name: "Internet",
+    Name: UtilityName.Internet,
     January: 30,
     February: 34.99,
     March: 30,
@@ -61,7 +69,7 @@ export const utilitiesData2025: UtilityRow[] = [
     December: ""
   },
   {
-    Name: "Mobile",
+    Name: UtilityName.Mobile,
     January: 23,
     February: 23,
     March: 23,
@@ -76,12 +84,12 @@ export const utilitiesData2025: UtilityRow[] = [
     December: ""
   },
   {
-    Name: "Water",
-    January: 22.83,
-    February: 22.95,
-    March: 23.68,
-    April: 21.81,
-    May: 24.16,
+    Name: UtilityName.Water,
+    January: "",
+    February: 177.05,
+    March: "",
+    April: "",
+    May: 183.97,
     June: "",
     July: "",
     August: "",

@@ -1,5 +1,12 @@
+export enum StockName {
+    JEPQ = "JEPQ",
+    JEPI = "JEPI",
+    SPYI = "SPYI",
+    PFE = "PFE",
+    MPW = "MPW",
+}
 export type DividendRow = {
-  Stock: string;
+  Stock: StockName;
   January: number | "";
   February: number | "";
   March: number | "";
@@ -16,7 +23,7 @@ export type DividendRow = {
 
 export const dividendData2025: DividendRow[] = [
   {
-    Stock: "JEPQ",
+    Stock: StockName.JEPQ,
     January: 19.29,
     February: 21.29,
     March: 23.37,
@@ -31,7 +38,7 @@ export const dividendData2025: DividendRow[] = [
     December: ""
   },
   {
-    Stock: "JEPI",
+    Stock: StockName.JEPI,
     January: 22.06,
     February: 18.33,
     March: 18.53,
@@ -46,7 +53,7 @@ export const dividendData2025: DividendRow[] = [
     December: ""
   },
   {
-    Stock: "SPYI",
+    Stock: StockName.SPYI,
     January: 22.83,
     February: 22.95,
     March: 23.68,
@@ -59,5 +66,35 @@ export const dividendData2025: DividendRow[] = [
     October: "",
     November: "",
     December: ""
-  }
-];
+  },
+    {
+        Stock: StockName.PFE,
+        January: "",
+        February: "",
+        March: 43,
+        April: "",
+        May: "",
+        June: 43,
+        July: "",
+        August: "",
+        September: "",
+        October: "",
+        November: "",
+        December: ""
+    },
+        {
+        Stock: StockName.MPW,
+        January: 20.25,
+        February: "",
+        March: "",
+        April: 20.25,
+        May: "",
+        June: "",
+        July: "",
+        August: "",
+        September: "",
+        October: "",
+        November: "",
+        December: ""
+    }
+] as const;
