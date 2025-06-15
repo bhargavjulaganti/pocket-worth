@@ -1,20 +1,6 @@
 "use client";
 import { dividendData2025 } from "./dividendData";
 import { utilitiesData2025 } from "./UtilitesData";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-
-// Register Chart.js components and datalabels plugin
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ChartDataLabels);
 
 export default function Home() {
   // Dividend table headers and totals
@@ -89,74 +75,9 @@ export default function Home() {
     return percent.toFixed(1) + "%";
   });
 
-  // Chart data
-  const chartData = {
-    labels: months,
-    datasets: [
-      {
-        label: "Dividends",
-        data: dividendMonthlyTotals,
-        backgroundColor: "#2196f3",
-        // Remove datalabels from dataset, set globally in options instead
-      },
-      {
-        label: "Utilities",
-        data: utilitiesMonthlyTotals,
-        backgroundColor: "#4caf50",
-        // Remove datalabels from dataset, set globally in options instead
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" as const },
-      tooltip: {
-        callbacks: {
-          afterBody: (context: { dataIndex: number }[]) => {
-            const idx = context[0].dataIndex;
-            return `Dividends are ${percentLess[idx]} less than Utilities`;
-          },
-        },
-      },
-      datalabels: {
-        display: true,
-        anchor: "end",
-        align: "start" as const,
-        color: (context: { dataset: { label: string }}) => {
-          // Blue for Dividends, Green for Utilities
-          return context.dataset.label === "Dividends" ? "#2196f3" : "#4caf50";
-        },
-        font: { weight: "bold" },
-        formatter: (value: number) => (value ? value.toFixed(2) : ""),
-      },
-    },
-    scales: {
-      y: { beginAtZero: true },
-    },
-  };
-
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        {/* Chart at the top */}
-        <div className="w-full max-w-5xl mb-8">
-          <Bar data={chartData} options={chartOptions} />
-          <div className="flex flex-wrap justify-between mt-2 text-xs">
-            {months.map((month, idx) => (
-              <div
-                key={month}
-                className="flex flex-col items-center w-1/12 min-w-[60px]"
-              >
-                <span className={percentLess[idx] ? "text-red-600 font-semibold" : ""}>
-                  {percentLess[idx] && `↓ ${percentLess[idx]}`}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Dividends Table on top */}
         <div className="w-full flex justify-center">
           <div>
