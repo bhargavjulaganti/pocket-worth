@@ -126,7 +126,7 @@ export default function Home() {
       legend: { position: "top" as const },
       tooltip: {
         callbacks: {
-          afterBody: (context: any) => {
+          afterBody: (context: { dataIndex: number }[]) => {
             const idx = context[0].dataIndex;
             return `Dividends are ${percentLess[idx]} less than Utilities`;
           },
