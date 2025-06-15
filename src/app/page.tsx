@@ -40,40 +40,40 @@ export default function Home() {
   });
 
   // Prepare months (excluding Stock/Name)
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  // const months = [
+  //   "January", "February", "March", "April", "May", "June",
+  //   "July", "August", "September", "October", "November", "December"
+  // ];
 
   // Calculate monthly totals for dividends and utilities
-  const dividendMonthlyTotals = months.map((month) =>
-    dividendData2025.reduce(
-      (sum, row) =>
-        typeof row[month as keyof typeof row] === "number"
-          ? sum + (row[month as keyof typeof row] as number)
-          : sum,
-      0
-    )
-  );
+  // const dividendMonthlyTotals = months.map((month) =>
+  //   dividendData2025.reduce(
+  //     (sum, row) =>
+  //       typeof row[month as keyof typeof row] === "number"
+  //         ? sum + (row[month as keyof typeof row] as number)
+  //         : sum,
+  //     0
+  //   )
+  // );
 
-  const utilitiesMonthlyTotals = months.map((month) =>
-    utilitiesData2025.reduce(
-      (sum, row) =>
-        typeof row[month as keyof typeof row] === "number"
-          ? sum + (row[month as keyof typeof row] as number)
-          : sum,
-      0
-    )
-  );
+  // const utilitiesMonthlyTotals = months.map((month) =>
+  //   utilitiesData2025.reduce(
+  //     (sum, row) =>
+  //       typeof row[month as keyof typeof row] === "number"
+  //         ? sum + (row[month as keyof typeof row] as number)
+  //         : sum,
+  //     0
+  //   )
+  // );
 
   // Calculate percentage difference per month
-  const percentLess = months.map((_, idx) => {
-    const util = utilitiesMonthlyTotals[idx];
-    const div = dividendMonthlyTotals[idx];
-    if (util === 0) return "";
-    const percent = ((util - div) / util) * 100;
-    return percent.toFixed(1) + "%";
-  });
+  // const percentLess = months.map((_, idx) => {
+  //   const util = utilitiesMonthlyTotals[idx];
+  //   const div = dividendMonthlyTotals[idx];
+  //   if (util === 0) return "";
+  //   const percent = ((util - div) / util) * 100;
+  //   return percent.toFixed(1) + "%";
+  // });
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
