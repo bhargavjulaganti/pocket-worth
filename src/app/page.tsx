@@ -97,25 +97,13 @@ export default function Home() {
         label: "Dividends",
         data: dividendMonthlyTotals,
         backgroundColor: "#2196f3",
-        datalabels: {
-          anchor: "end",
-          align: "start",
-          color: "#2196f3",
-          font: { weight: "bold" },
-          formatter: (value: number) => value ? value.toFixed(2) : "",
-        },
+        // Remove datalabels from dataset, set globally in options instead
       },
       {
         label: "Utilities",
         data: utilitiesMonthlyTotals,
         backgroundColor: "#4caf50",
-        datalabels: {
-          anchor: "end",
-          align: "start",
-          color: "#4caf50",
-          font: { weight: "bold" },
-          formatter: (value: number) => value ? value.toFixed(2) : "",
-        },
+        // Remove datalabels from dataset, set globally in options instead
       },
     ],
   };
@@ -135,10 +123,13 @@ export default function Home() {
       datalabels: {
         display: true,
         anchor: "end",
-        align: "start",
-        color: "#222",
+        align: "start" as const,
+        color: (context: any) => {
+          // Blue for Dividends, Green for Utilities
+          return context.dataset.label === "Dividends" ? "#2196f3" : "#4caf50";
+        },
         font: { weight: "bold" },
-        formatter: (value: number) => value ? value.toFixed(2) : "",
+        formatter: (value: number) => (value ? value.toFixed(2) : ""),
       },
     },
     scales: {
