@@ -124,7 +124,7 @@ export default function Home() {
         display: true,
         anchor: "end",
         align: "start" as const,
-        color: (context: any) => {
+        color: (context: { dataset: { label: string }}) => {
           // Blue for Dividends, Green for Utilities
           return context.dataset.label === "Dividends" ? "#2196f3" : "#4caf50";
         },
