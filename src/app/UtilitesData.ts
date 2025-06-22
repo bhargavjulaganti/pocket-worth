@@ -60,7 +60,7 @@ export const utilitiesData2025: UtilityRow[] = [
     March: 30,
     April: 30,
     May: 30,
-    June: "",
+    June: 30,
     July: "",
     August: "",
     September: "",
