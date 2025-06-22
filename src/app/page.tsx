@@ -55,6 +55,7 @@ export default function Home() {
   }, []);
 
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
