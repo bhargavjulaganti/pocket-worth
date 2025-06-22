@@ -13,12 +13,20 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof (err as Record<string, unknown>).message === "string"
+      ) {
+        setError((err as { message: string }).message);
+      } else {
+        setError("Login failed");
+      }
     }
   };
 
