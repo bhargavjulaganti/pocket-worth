@@ -19,6 +19,7 @@ export default function LoginPage() {
     //   return;
     // }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/");
