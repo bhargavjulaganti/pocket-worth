@@ -23,8 +23,17 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/");
-    } catch (err: any) {
-      setError("Login failed: " + (err.message || "Unknown error"));
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof (err as Record<string, unknown>).message === "string"
+      ) {
+        setError("Login failed: " + (err as { message: string }).message);
+      } else {
+        setError("Login failed: Unknown error");
+      }
     }
   };
 
