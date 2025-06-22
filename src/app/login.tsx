@@ -4,9 +4,6 @@ import { auth } from "../utils/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
-const DEFAULT_EMAIL = "bhargavjulaganti@gmail.com";
-const DEFAULT_PASSWORD = "password123";
-
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
