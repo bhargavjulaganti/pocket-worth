@@ -1,8 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { auth } from "../utils/firebaseConfig";
 import { dividendData2025 } from "./dividendData";
 import { utilitiesData2025 } from "./UtilitesData";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
+import Link from "next/link";
 
 export default function Home() {
   // Dividend table headers and totals
@@ -51,8 +55,38 @@ export default function Home() {
       .catch((err) => setPbError(err.message));
   }, []);
 
+  const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false);
+      if (!firebaseUser) {
+        router.replace("/login");
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    return null; // Will redirect to /login
+  }
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      {/* Logout link at top right */}
+      <div className="w-full flex justify-end absolute top-4 right-8 z-10">
+        <Link href="/logout" className="text-green-700 underline hover:text-green-900 font-semibold">
+          Logout
+        </Link>
+      </div>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         {/* Dividends Table on top */}
         <div className="w-full flex justify-center">
@@ -161,7 +195,9 @@ export default function Home() {
           </div>
         </div>
       </main>
+      {/* Remove the logout link from the footer */}
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+        {/* (No logout link here) */}
       </footer>
     </div>
   );
