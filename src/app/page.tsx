@@ -1,6 +1,8 @@
 "use client";
+import { useEffect, useState } from "react";
 import { dividendData2025 } from "./dividendData";
 import { utilitiesData2025 } from "./UtilitesData";
+import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 
 export default function Home() {
   // Dividend table headers and totals
@@ -39,41 +41,15 @@ export default function Home() {
     }
   });
 
-  // Prepare months (excluding Stock/Name)
-  // const months = [
-  //   "January", "February", "March", "April", "May", "June",
-  //   "July", "August", "September", "October", "November", "December"
-  // ];
+  // PassiveBloom state and fetch
+  const [passiveBloomRows, setPassiveBloomRows] = useState<PassiveBloomRow[]>([]);
+  const [pbError, setPbError] = useState<string | null>(null);
 
-  // Calculate monthly totals for dividends and utilities
-  // const dividendMonthlyTotals = months.map((month) =>
-  //   dividendData2025.reduce(
-  //     (sum, row) =>
-  //       typeof row[month as keyof typeof row] === "number"
-  //         ? sum + (row[month as keyof typeof row] as number)
-  //         : sum,
-  //     0
-  //   )
-  // );
-
-  // const utilitiesMonthlyTotals = months.map((month) =>
-  //   utilitiesData2025.reduce(
-  //     (sum, row) =>
-  //       typeof row[month as keyof typeof row] === "number"
-  //         ? sum + (row[month as keyof typeof row] as number)
-  //         : sum,
-  //     0
-  //   )
-  // );
-
-  // Calculate percentage difference per month
-  // const percentLess = months.map((_, idx) => {
-  //   const util = utilitiesMonthlyTotals[idx];
-  //   const div = dividendMonthlyTotals[idx];
-  //   if (util === 0) return "";
-  //   const percent = ((util - div) / util) * 100;
-  //   return percent.toFixed(1) + "%";
-  // });
+  useEffect(() => {
+    PassiveBloom.getAll()
+      .then(setPassiveBloomRows)
+      .catch((err) => setPbError(err.message));
+  }, []);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -145,6 +121,41 @@ export default function Home() {
                     </td>
                   ))}
                 </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* PassiveBloom Table */}
+        <div className="w-full flex justify-center mt-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">PassiveBloom Data</h2>
+            {pbError && <div className="text-red-600 mb-2">{pbError}</div>}
+            <table className="border-collapse border">
+              <thead>
+                <tr className="bg-green-600 text-white">
+                  <th className="border border-gray-400 px-4 py-2">ID</th>
+                  <th className="border border-gray-400 px-4 py-2">Created At</th>
+                  <th className="border border-gray-400 px-4 py-2">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {passiveBloomRows.map((row) => (
+                  <tr key={row.id}>
+                    <td className="border border-gray-400 px-4 py-2">{row.id}</td>
+                    <td className="border border-gray-400 px-4 py-2">
+                      {row.created_at ? row.created_at.slice(0, 10) : ""}
+                    </td>
+                    <td className="border border-gray-400 px-4 py-2">{row.amount}</td>
+                  </tr>
+                ))}
+                {passiveBloomRows.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="text-center py-4">
+                      No data found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
