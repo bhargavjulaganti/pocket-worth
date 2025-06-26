@@ -171,41 +171,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Utilities Table below */}
-        <div className="w-full flex justify-center mt-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Utilities</h2>
-            <table className="border-collapse border">
-              <thead>
-                <tr className="bg-green-600 text-white">
-                  {utilitiesHeaders.map((header) => (
-                    <th key={header} className="border border-gray-400 px-4 py-2">
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {utilitiesData2025.map((row) => (
-                  <tr key={row.Name}>
-                    {utilitiesHeaders.map((header) => (
-                      <td key={header} className="border border-gray-400 px-4 py-2">
-                        {row[header as keyof typeof row]}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-                <tr className="font-bold">
-                  {utilitiesHeaders.map((header) => (
-                    <td key={header} className="border px-4 py-2">
-                      {utilitiesTotals[header]}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
 
         {/* PassiveBloom Table */}
         <div className="w-full flex justify-center mt-8">
