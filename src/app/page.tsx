@@ -7,6 +7,7 @@ import { utilitiesData2025 } from "./UtilitesData";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
 import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
+import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
 
 export default function Home() {
   const utilitiesHeaders = utilitiesData2025.length > 0 ? Object.keys(utilitiesData2025[0]) : [];
@@ -53,6 +54,23 @@ export default function Home() {
       });
   }, []);
 
+  // Utility expenses state
+  const [utilityExpenses, setUtilityExpenses] = useState<UtilityExpense[]>([]);
+  const [utilityExpensesLoading, setUtilityExpensesLoading] = useState(true);
+  const [utilityExpensesError, setUtilityExpensesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUtilityExpenses()
+      .then((data) => {
+        setUtilityExpenses(data);
+        setUtilityExpensesLoading(false);
+      })
+      .catch((err) => {
+        setUtilityExpensesError(err.message);
+        setUtilityExpensesLoading(false);
+      });
+  }, []);
+
   // --- Pivot dividends data for month-wise table ---
   const monthsOrder = [
     "January", "February", "March", "April", "May", "June",
@@ -70,6 +88,29 @@ export default function Home() {
     const symbol = div.stock_symbol;
     if (!pivotData[symbol]) pivotData[symbol] = {};
     pivotData[symbol][div.month] = Number(div.amount);
+  });
+
+  // --- Pivot utility expenses data for month-wise table ---
+  const utilityMonthsOrder = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Get unique category names
+  const utilityCategories = Array.from(
+    new Set(utilityExpenses.map((e) => e.category_name))
+  );
+
+  // Build pivot data: { [category]: { [month]: totalAmount } }
+  const utilityPivotData: Record<string, Record<string, number>> = {};
+  utilityExpenses.forEach((exp) => {
+    const category = exp.category_name;
+    // Parse month from create_date as local date (YYYY-MM-DD)
+    const [year, monthNum] = exp.create_date.split('-');
+    const month = new Date(Number(year), Number(monthNum) - 1).toLocaleString("en-US", { month: "long" });
+    if (!utilityPivotData[category]) utilityPivotData[category] = {};
+    if (!utilityPivotData[category][month]) utilityPivotData[category][month] = 0;
+    utilityPivotData[category][month] += Number(exp.amount);
   });
 
   const [loading, setLoading] = useState(true);
@@ -215,6 +256,50 @@ export default function Home() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Pivoted Utility Expenses Table */}
+        <div className="w-full flex justify-center mt-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Utility Expenses by Month</h2>
+            {utilityExpensesLoading ? (
+              <div>Loading utility expenses...</div>
+            ) : utilityExpensesError ? (
+              <div className="text-red-600">{utilityExpensesError}</div>
+            ) : (
+              <table className="border-collapse border">
+                <thead>
+                  <tr className="bg-green-600 text-white">
+                    <th className="border border-gray-400 px-4 py-2">Name</th>
+                    {utilityMonthsOrder.map((month) => (
+                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {utilityCategories.map((category) => (
+                    <tr key={category}>
+                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
+                      {utilityMonthsOrder.map((month) => (
+                        <td key={month} className="border border-gray-400 px-4 py-2">
+                          {utilityPivotData[category][month] !== undefined
+                            ? utilityPivotData[category][month].toFixed(2)
+                            : ""}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  {utilityCategories.length === 0 && (
+                    <tr>
+                      <td colSpan={utilityMonthsOrder.length + 1} className="text-center py-4">
+                        No utility expenses found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </main>
