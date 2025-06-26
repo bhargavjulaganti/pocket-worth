@@ -190,83 +190,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Pivoted Dividends Table */}
-        <div className="w-full flex justify-center">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Dividends by Month</h2>
-            {dividendsLoading ? (
-              <div>Loading dividends...</div>
-            ) : dividendsError ? (
-              <div className="text-red-600">{dividendsError}</div>
-            ) : (
-              <table className="border-collapse border">
-                <thead>
-                  <tr className="bg-green-600 text-white">
-                    <th className="border border-gray-400 px-4 py-2">Stock</th>
-                    {monthsOrder.map((month) => (
-                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {stockSymbols.map((symbol) => (
-                    <tr key={symbol}>
-                      <td className="border border-gray-400 px-4 py-2 font-semibold">{symbol}</td>
-                      {monthsOrder.map((month) => (
-                        <td key={month} className="border border-gray-400 px-4 py-2">
-                          {pivotData[symbol][month] !== undefined ? pivotData[symbol][month].toFixed(2) : ""}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                  {stockSymbols.length === 0 && (
-                    <tr>
-                      <td colSpan={monthsOrder.length + 1} className="text-center py-4">
-                        No dividend data found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-
-        {/* PassiveBloom Table - move to bottom */}
-        <div className="w-full flex justify-center mt-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">PassiveBloom Data</h2>
-            {pbError && <div className="text-red-600 mb-2">{pbError}</div>}
-            <table className="border-collapse border">
-              <thead>
-                <tr className="bg-green-600 text-white">
-                  <th className="border border-gray-400 px-4 py-2">ID</th>
-                  <th className="border border-gray-400 px-4 py-2">Created At</th>
-                  <th className="border border-gray-400 px-4 py-2">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {passiveBloomRows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="border border-gray-400 px-4 py-2">{row.id}</td>
-                    <td className="border border-gray-400 px-4 py-2">
-                      {row.created_at ? row.created_at.slice(0, 10) : ""}
-                    </td>
-                    <td className="border border-gray-400 px-4 py-2">{row.amount}</td>
-                  </tr>
-                ))}
-                {passiveBloomRows.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="text-center py-4">
-                      No data found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         {/* Pivoted Dividend Income Table */}
         <div className="w-full flex justify-center mt-8">
           <div>
@@ -319,6 +242,44 @@ export default function Home() {
             )}
           </div>
         </div>
+
+
+
+        {/* PassiveBloom Table - move to bottom */}
+        <div className="w-full flex justify-center mt-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">PassiveBloom Data</h2>
+            {pbError && <div className="text-red-600 mb-2">{pbError}</div>}
+            <table className="border-collapse border">
+              <thead>
+                <tr className="bg-green-600 text-white">
+                  <th className="border border-gray-400 px-4 py-2">ID</th>
+                  <th className="border border-gray-400 px-4 py-2">Created At</th>
+                  <th className="border border-gray-400 px-4 py-2">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {passiveBloomRows.map((row) => (
+                  <tr key={row.id}>
+                    <td className="border border-gray-400 px-4 py-2">{row.id}</td>
+                    <td className="border border-gray-400 px-4 py-2">
+                      {row.created_at ? row.created_at.slice(0, 10) : ""}
+                    </td>
+                    <td className="border border-gray-400 px-4 py-2">{row.amount}</td>
+                  </tr>
+                ))}
+                {passiveBloomRows.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="text-center py-4">
+                      No data found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </main>
       {/* Remove the logout link from the footer */}
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
