@@ -3,32 +3,12 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
-// import { dividendData2025 } from "./dividendData";
 import { utilitiesData2025 } from "./UtilitesData";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
 import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
 
 export default function Home() {
-  // Dividend table headers and totals
-  // const dividendHeaders = dividendData2025.length > 0 ? Object.keys(dividendData2025[0]) : [];
-  // const dividendTotals: Record<string, number | string> = {};
-  // dividendHeaders.forEach((header) => {
-  //   if (header === "Stock") {
-  //     dividendTotals[header] = "Total";
-  //   } else {
-  //     const sum = dividendData2025.reduce(
-  //       (sum, row) =>
-  //         typeof row[header as keyof typeof row] === "number"
-  //           ? sum + (row[header as keyof typeof row] as number)
-  //           : sum,
-  //       0
-  //     );
-  //     dividendTotals[header] = sum ? sum.toFixed(2) : "";
-  //   }
-  // });
-
-  // Utilities table headers and totals
   const utilitiesHeaders = utilitiesData2025.length > 0 ? Object.keys(utilitiesData2025[0]) : [];
   const utilitiesTotals: Record<string, number | string> = {};
   utilitiesHeaders.forEach((header) => {
@@ -128,7 +108,7 @@ export default function Home() {
         {/* Pivoted Dividends Table */}
         <div className="w-full flex justify-center">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Dividends by Month (Supabase)</h2>
+            <h2 className="text-xl font-semibold mb-4">Dividends by Month</h2>
             {dividendsLoading ? (
               <div>Loading dividends...</div>
             ) : dividendsError ? (
