@@ -3,28 +3,13 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
-import { utilitiesData2025 } from "./UtilitesData";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
 import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
+import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
+import { UtilityPivot } from "../utils/UtilityPivot";
 
 export default function Home() {
-  const utilitiesHeaders = utilitiesData2025.length > 0 ? Object.keys(utilitiesData2025[0]) : [];
-  const utilitiesTotals: Record<string, number | string> = {};
-  utilitiesHeaders.forEach((header) => {
-    if (header === "Name") {
-      utilitiesTotals[header] = "Total";
-    } else {
-      const sum = utilitiesData2025.reduce(
-        (sum, row) =>
-          typeof row[header as keyof typeof row] === "number"
-            ? sum + (row[header as keyof typeof row] as number)
-            : sum,
-        0
-      );
-      utilitiesTotals[header] = sum ? sum.toFixed(2) : "";
-    }
-  });
 
   // PassiveBloom state and fetch
   const [passiveBloomRows, setPassiveBloomRows] = useState<PassiveBloomRow[]>([]);
@@ -52,6 +37,29 @@ export default function Home() {
         setDividendsLoading(false);
       });
   }, []);
+
+  // Utility expenses state
+  const [utilityExpenses, setUtilityExpenses] = useState<UtilityExpense[]>([]);
+  const [utilityExpensesLoading, setUtilityExpensesLoading] = useState(true);
+  const [utilityExpensesError, setUtilityExpensesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUtilityExpenses()
+      .then((data) => {
+        setUtilityExpenses(data);
+        setUtilityExpensesLoading(false);
+      })
+      .catch((err) => {
+        setUtilityExpensesError(err.message);
+        setUtilityExpensesLoading(false);
+      });
+  }, []);
+
+  // --- Pivot utility expenses data for month-wise table ---
+  const utilityMonthsOrder = UtilityPivot.monthsOrder;
+  const utilityCategories = UtilityPivot.getCategories(utilityExpenses);
+  const utilityPivotData = UtilityPivot.getPivotData(utilityExpenses);
+  const utilityMonthTotals = UtilityPivot.getMonthTotals(utilityPivotData, utilityCategories);
 
   // --- Pivot dividends data for month-wise table ---
   const monthsOrder = [
@@ -105,6 +113,59 @@ export default function Home() {
         </Link>
       </div>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        {/* Utility Expenses by Month - move to top */}
+        <div className="w-full flex justify-center">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Utility Expenses by Month</h2>
+            {utilityExpensesLoading ? (
+              <div>Loading utility expenses...</div>
+            ) : utilityExpensesError ? (
+              <div className="text-red-600">{utilityExpensesError}</div>
+            ) : (
+              <table className="border-collapse border">
+                <thead>
+                  <tr className="bg-green-600 text-white">
+                    <th className="border border-gray-400 px-4 py-2">Name</th>
+                    {utilityMonthsOrder.map((month) => (
+                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {utilityCategories.map((category) => (
+                    <tr key={category}>
+                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
+                      {utilityMonthsOrder.map((month) => (
+                        <td key={month} className="border border-gray-400 px-4 py-2">
+                          {utilityPivotData[category][month] !== undefined
+                            ? utilityPivotData[category][month].toFixed(2)
+                            : ""}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  {/* Total row */}
+                  <tr className="font-bold" >
+                    <td className="border border-gray-400 px-4 py-2">Total</td>
+                    {utilityMonthsOrder.map((month) => (
+                      <td key={month} className="border border-gray-400 px-4 py-2">
+                        {utilityMonthTotals[month] ? utilityMonthTotals[month].toFixed(2) : ""}
+                      </td>
+                    ))}
+                  </tr>
+                  {utilityCategories.length === 0 && (
+                    <tr>
+                      <td colSpan={utilityMonthsOrder.length + 1} className="text-center py-4">
+                        No utility expenses found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
         {/* Pivoted Dividends Table */}
         <div className="w-full flex justify-center">
           <div>
@@ -147,43 +208,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Utilities Table below */}
-        <div className="w-full flex justify-center mt-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Utilities</h2>
-            <table className="border-collapse border">
-              <thead>
-                <tr className="bg-green-600 text-white">
-                  {utilitiesHeaders.map((header) => (
-                    <th key={header} className="border border-gray-400 px-4 py-2">
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {utilitiesData2025.map((row) => (
-                  <tr key={row.Name}>
-                    {utilitiesHeaders.map((header) => (
-                      <td key={header} className="border border-gray-400 px-4 py-2">
-                        {row[header as keyof typeof row]}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-                <tr className="font-bold">
-                  {utilitiesHeaders.map((header) => (
-                    <td key={header} className="border px-4 py-2">
-                      {utilitiesTotals[header]}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* PassiveBloom Table */}
+        {/* PassiveBloom Table - move to bottom */}
         <div className="w-full flex justify-center mt-8">
           <div>
             <h2 className="text-xl font-semibold mb-4">PassiveBloom Data</h2>
