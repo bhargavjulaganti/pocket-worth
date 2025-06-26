@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
-import { dividendData2025 } from "./dividendData";
+// import { dividendData2025 } from "./dividendData";
 import { utilitiesData2025 } from "./UtilitesData";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
@@ -11,22 +11,22 @@ import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendD
 
 export default function Home() {
   // Dividend table headers and totals
-  const dividendHeaders = dividendData2025.length > 0 ? Object.keys(dividendData2025[0]) : [];
-  const dividendTotals: Record<string, number | string> = {};
-  dividendHeaders.forEach((header) => {
-    if (header === "Stock") {
-      dividendTotals[header] = "Total";
-    } else {
-      const sum = dividendData2025.reduce(
-        (sum, row) =>
-          typeof row[header as keyof typeof row] === "number"
-            ? sum + (row[header as keyof typeof row] as number)
-            : sum,
-        0
-      );
-      dividendTotals[header] = sum ? sum.toFixed(2) : "";
-    }
-  });
+  // const dividendHeaders = dividendData2025.length > 0 ? Object.keys(dividendData2025[0]) : [];
+  // const dividendTotals: Record<string, number | string> = {};
+  // dividendHeaders.forEach((header) => {
+  //   if (header === "Stock") {
+  //     dividendTotals[header] = "Total";
+  //   } else {
+  //     const sum = dividendData2025.reduce(
+  //       (sum, row) =>
+  //         typeof row[header as keyof typeof row] === "number"
+  //           ? sum + (row[header as keyof typeof row] as number)
+  //           : sum,
+  //       0
+  //     );
+  //     dividendTotals[header] = sum ? sum.toFixed(2) : "";
+  //   }
+  // });
 
   // Utilities table headers and totals
   const utilitiesHeaders = utilitiesData2025.length > 0 ? Object.keys(utilitiesData2025[0]) : [];
@@ -200,48 +200,6 @@ export default function Home() {
                 </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Supabase Dividends Table */}
-        <div className="w-full flex justify-center">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Dividends (Supabase)</h2>
-            {dividendsLoading ? (
-              <div>Loading dividends...</div>
-            ) : dividendsError ? (
-              <div className="text-red-600">{dividendsError}</div>
-            ) : (
-              <table className="border-collapse border">
-                <thead>
-                  <tr className="bg-green-600 text-white">
-                    <th className="border border-gray-400 px-4 py-2">ID</th>
-                    <th className="border border-gray-400 px-4 py-2">Stock ID</th>
-                    <th className="border border-gray-400 px-4 py-2">Month</th>
-                    <th className="border border-gray-400 px-4 py-2">Year</th>
-                    <th className="border border-gray-400 px-4 py-2">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dividends.map((div) => (
-                    <tr key={div.id}>
-                      <td className="border border-gray-400 px-4 py-2">{div.id}</td>
-                      <td className="border border-gray-400 px-4 py-2">{div.stock_id}</td>
-                      <td className="border border-gray-400 px-4 py-2">{div.month}</td>
-                      <td className="border border-gray-400 px-4 py-2">{div.year}</td>
-                      <td className="border border-gray-400 px-4 py-2">{div.amount}</td>
-                    </tr>
-                  ))}
-                  {dividends.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="text-center py-4">
-                        No dividend data found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
           </div>
         </div>
 
