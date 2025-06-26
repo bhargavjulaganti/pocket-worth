@@ -3,31 +3,12 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
-import { dividendData2025 } from "./dividendData";
 import { utilitiesData2025 } from "./UtilitesData";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
+import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
 
 export default function Home() {
-  // Dividend table headers and totals
-  const dividendHeaders = dividendData2025.length > 0 ? Object.keys(dividendData2025[0]) : [];
-  const dividendTotals: Record<string, number | string> = {};
-  dividendHeaders.forEach((header) => {
-    if (header === "Stock") {
-      dividendTotals[header] = "Total";
-    } else {
-      const sum = dividendData2025.reduce(
-        (sum, row) =>
-          typeof row[header as keyof typeof row] === "number"
-            ? sum + (row[header as keyof typeof row] as number)
-            : sum,
-        0
-      );
-      dividendTotals[header] = sum ? sum.toFixed(2) : "";
-    }
-  });
-
-  // Utilities table headers and totals
   const utilitiesHeaders = utilitiesData2025.length > 0 ? Object.keys(utilitiesData2025[0]) : [];
   const utilitiesTotals: Record<string, number | string> = {};
   utilitiesHeaders.forEach((header) => {
@@ -54,6 +35,42 @@ export default function Home() {
       .then(setPassiveBloomRows)
       .catch((err) => setPbError(err.message));
   }, []);
+
+  // Supabase dividends with symbol state
+  const [dividends, setDividends] = useState<DividendWithSymbol[]>([]);
+  const [dividendsLoading, setDividendsLoading] = useState(true);
+  const [dividendsError, setDividendsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchDividendsWithSymbol()
+      .then((data) => {
+        setDividends(data);
+        setDividendsLoading(false);
+      })
+      .catch((err) => {
+        setDividendsError(err.message);
+        setDividendsLoading(false);
+      });
+  }, []);
+
+  // --- Pivot dividends data for month-wise table ---
+  const monthsOrder = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Get unique stock symbols in the order they appear
+  const stockSymbols = Array.from(
+    new Set(dividends.map((d) => d.stock_symbol))
+  );
+
+  // Build pivot data: { [symbol]: { [month]: amount } }
+  const pivotData: Record<string, Record<string, number>> = {};
+  dividends.forEach((div) => {
+    const symbol = div.stock_symbol;
+    if (!pivotData[symbol]) pivotData[symbol] = {};
+    pivotData[symbol][div.month] = Number(div.amount);
+  });
 
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,39 +105,45 @@ export default function Home() {
         </Link>
       </div>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        {/* Dividends Table on top */}
+        {/* Pivoted Dividends Table */}
         <div className="w-full flex justify-center">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Dividends</h2>
-            <table className="border-collapse border">
-              <thead>
-                <tr className="bg-green-600 text-white">
-                  {dividendHeaders.map((header) => (
-                    <th key={header} className="border border-gray-400 px-4 py-2">
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {dividendData2025.map((row) => (
-                  <tr key={row.Stock}>
-                    {dividendHeaders.map((header) => (
-                      <td key={header} className="border border-gray-400 px-4 py-2">
-                        {row[header as keyof typeof row]}
-                      </td>
+            <h2 className="text-xl font-semibold mb-4">Dividends by Month</h2>
+            {dividendsLoading ? (
+              <div>Loading dividends...</div>
+            ) : dividendsError ? (
+              <div className="text-red-600">{dividendsError}</div>
+            ) : (
+              <table className="border-collapse border">
+                <thead>
+                  <tr className="bg-green-600 text-white">
+                    <th className="border border-gray-400 px-4 py-2">Stock</th>
+                    {monthsOrder.map((month) => (
+                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
                     ))}
                   </tr>
-                ))}
-                <tr className="font-bold">
-                  {dividendHeaders.map((header) => (
-                    <td key={header} className="border px-4 py-2">
-                      {dividendTotals[header]}
-                    </td>
+                </thead>
+                <tbody>
+                  {stockSymbols.map((symbol) => (
+                    <tr key={symbol}>
+                      <td className="border border-gray-400 px-4 py-2 font-semibold">{symbol}</td>
+                      {monthsOrder.map((month) => (
+                        <td key={month} className="border border-gray-400 px-4 py-2">
+                          {pivotData[symbol][month] !== undefined ? pivotData[symbol][month].toFixed(2) : ""}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
-              </tbody>
-            </table>
+                  {stockSymbols.length === 0 && (
+                    <tr>
+                      <td colSpan={monthsOrder.length + 1} className="text-center py-4">
+                        No dividend data found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
