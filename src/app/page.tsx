@@ -8,6 +8,7 @@ import Link from "next/link";
 import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
 import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
 import { UtilityPivot } from "../utils/UtilityPivot";
+import { fetchDividendIncome, DividendIncome, DividendIncomePivot } from "../utils/DividendIncome";
 
 export default function Home() {
 
@@ -55,6 +56,23 @@ export default function Home() {
       });
   }, []);
 
+  // Dividend income state
+  const [dividendIncome, setDividendIncome] = useState<DividendIncome[]>([]);
+  const [dividendIncomeLoading, setDividendIncomeLoading] = useState(true);
+  const [dividendIncomeError, setDividendIncomeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchDividendIncome()
+      .then((data) => {
+        setDividendIncome(data);
+        setDividendIncomeLoading(false);
+      })
+      .catch((err) => {
+        setDividendIncomeError(err.message);
+        setDividendIncomeLoading(false);
+      });
+  }, []);
+
   // --- Pivot utility expenses data for month-wise table ---
   const utilityMonthsOrder = UtilityPivot.monthsOrder;
   const utilityCategories = UtilityPivot.getCategories(utilityExpenses);
@@ -79,6 +97,12 @@ export default function Home() {
     if (!pivotData[symbol]) pivotData[symbol] = {};
     pivotData[symbol][div.month] = Number(div.amount);
   });
+
+  // --- Pivot dividend income data for month-wise table ---
+  const dividendIncomeMonthsOrder = DividendIncomePivot.monthsOrder;
+  const dividendIncomeCategories = DividendIncomePivot.getCategories(dividendIncome);
+  const dividendIncomePivotData = DividendIncomePivot.getPivotData(dividendIncome);
+  const dividendIncomeMonthTotals = DividendIncomePivot.getMonthTotals(dividendIncomePivotData, dividendIncomeCategories);
 
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
