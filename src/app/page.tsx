@@ -275,7 +275,7 @@ export default function Home() {
                     </tr>
                   ))}
                   {/* Total row */}
-                  <tr className="font-bold" style={{ backgroundColor: "#e6f4ea" }}>
+                  <tr className="font-bold">
                     <td className="border border-gray-400 px-4 py-2">Total</td>
                     {dividendIncomeMonthsOrder.map((month) => (
                       <td key={month} className="border border-gray-400 px-4 py-2">
