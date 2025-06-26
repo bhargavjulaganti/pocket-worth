@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
-import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
+import { DividendWithSymbol } from "../utils/DividendData";
 import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
 import { UtilityPivot } from "../utils/UtilityPivot";
 import { fetchDividendIncome, DividendIncome, DividendIncomePivot } from "../utils/DividendIncome";
@@ -23,21 +23,10 @@ export default function Home() {
   }, []);
 
   // Supabase dividends with symbol state
-  const [dividends, setDividends] = useState<DividendWithSymbol[]>([]);
-  const [dividendsLoading, setDividendsLoading] = useState(true);
-  const [dividendsError, setDividendsError] = useState<string | null>(null);
+  const [dividends] = useState<DividendWithSymbol[]>([]);
+  
 
-  useEffect(() => {
-    fetchDividendsWithSymbol()
-      .then((data) => {
-        setDividends(data);
-        setDividendsLoading(false);
-      })
-      .catch((err) => {
-        setDividendsError(err.message);
-        setDividendsLoading(false);
-      });
-  }, []);
+
 
   // Utility expenses state
   const [utilityExpenses, setUtilityExpenses] = useState<UtilityExpense[]>([]);
@@ -79,16 +68,8 @@ export default function Home() {
   const utilityPivotData = UtilityPivot.getPivotData(utilityExpenses);
   const utilityMonthTotals = UtilityPivot.getMonthTotals(utilityPivotData, utilityCategories);
 
-  // --- Pivot dividends data for month-wise table ---
-  const monthsOrder = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
 
-  // Get unique stock symbols in the order they appear
-  const stockSymbols = Array.from(
-    new Set(dividends.map((d) => d.stock_symbol))
-  );
+
 
   // Build pivot data: { [symbol]: { [month]: amount } }
   const pivotData: Record<string, Record<string, number>> = {};
