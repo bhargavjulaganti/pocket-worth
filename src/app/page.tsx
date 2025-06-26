@@ -76,6 +76,7 @@ export default function Home() {
   const utilityMonthsOrder = UtilityPivot.monthsOrder;
   const utilityCategories = UtilityPivot.getCategories(utilityExpenses);
   const utilityPivotData = UtilityPivot.getPivotData(utilityExpenses);
+  const utilityMonthTotals = UtilityPivot.getMonthTotals(utilityPivotData, utilityCategories);
 
   // --- Pivot dividends data for month-wise table ---
   const monthsOrder = [
@@ -238,6 +239,15 @@ export default function Home() {
                       ))}
                     </tr>
                   ))}
+                  {/* Total row */}
+                  <tr className="font-bold bg-green-100">
+                    <td className="border border-gray-400 px-4 py-2">Total</td>
+                    {utilityMonthsOrder.map((month) => (
+                      <td key={month} className="border border-gray-400 px-4 py-2">
+                        {utilityMonthTotals[month] ? utilityMonthTotals[month].toFixed(2) : ""}
+                      </td>
+                    ))}
+                  </tr>
                   {utilityCategories.length === 0 && (
                     <tr>
                       <td colSpan={utilityMonthsOrder.length + 1} className="text-center py-4">
@@ -258,4 +268,3 @@ export default function Home() {
     </div>
   );
 }
-

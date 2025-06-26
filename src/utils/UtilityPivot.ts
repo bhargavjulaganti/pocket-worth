@@ -23,4 +23,18 @@ export class UtilityPivot {
     });
     return pivotData;
   }
+
+  static getMonthTotals(
+    pivotData: Record<string, Record<string, number>>,
+    categories: string[]
+  ): Record<string, number> {
+    const totals: Record<string, number> = {};
+    this.monthsOrder.forEach((month) => {
+      totals[month] = categories.reduce(
+        (sum, category) => sum + (pivotData[category][month] || 0),
+        0
+      );
+    });
+    return totals;
+  }
 }
