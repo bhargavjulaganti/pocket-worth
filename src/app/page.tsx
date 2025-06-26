@@ -240,7 +240,7 @@ export default function Home() {
                     </tr>
                   ))}
                   {/* Total row */}
-                  <tr className="font-bold bg-green-100">
+                  <tr className="font-bold" >
                     <td className="border border-gray-400 px-4 py-2">Total</td>
                     {utilityMonthsOrder.map((month) => (
                       <td key={month} className="border border-gray-400 px-4 py-2">
