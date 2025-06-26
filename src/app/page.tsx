@@ -242,6 +242,59 @@ export default function Home() {
             </table>
           </div>
         </div>
+
+        {/* Pivoted Dividend Income Table */}
+        <div className="w-full flex justify-center mt-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Dividend Income by Month</h2>
+            {dividendIncomeLoading ? (
+              <div>Loading dividend income...</div>
+            ) : dividendIncomeError ? (
+              <div className="text-red-600">{dividendIncomeError}</div>
+            ) : (
+              <table className="border-collapse border">
+                <thead>
+                  <tr className="bg-green-600 text-white">
+                    <th className="border border-gray-400 px-4 py-2">Name</th>
+                    {dividendIncomeMonthsOrder.map((month) => (
+                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dividendIncomeCategories.map((category) => (
+                    <tr key={category}>
+                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
+                      {dividendIncomeMonthsOrder.map((month) => (
+                        <td key={month} className="border border-gray-400 px-4 py-2">
+                          {dividendIncomePivotData[category][month] !== undefined
+                            ? dividendIncomePivotData[category][month].toFixed(2)
+                            : ""}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  {/* Total row */}
+                  <tr className="font-bold" style={{ backgroundColor: "#e6f4ea" }}>
+                    <td className="border border-gray-400 px-4 py-2">Total</td>
+                    {dividendIncomeMonthsOrder.map((month) => (
+                      <td key={month} className="border border-gray-400 px-4 py-2">
+                        {dividendIncomeMonthTotals[month] ? dividendIncomeMonthTotals[month].toFixed(2) : ""}
+                      </td>
+                    ))}
+                  </tr>
+                  {dividendIncomeCategories.length === 0 && (
+                    <tr>
+                      <td colSpan={dividendIncomeMonthsOrder.length + 1} className="text-center py-4">
+                        No dividend income found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
       </main>
       {/* Remove the logout link from the footer */}
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
