@@ -15,6 +15,7 @@ const eslintConfig = [
     rules: {
       "no-console": "off",
       "react-hooks/exhaustive-deps": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
 ];
