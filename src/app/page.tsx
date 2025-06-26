@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
-import { utilitiesData2025 } from "./UtilitesData";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
 import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
@@ -11,22 +10,6 @@ import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
 import { UtilityPivot } from "../utils/UtilityPivot";
 
 export default function Home() {
-  const utilitiesHeaders = utilitiesData2025.length > 0 ? Object.keys(utilitiesData2025[0]) : [];
-  const utilitiesTotals: Record<string, number | string> = {};
-  utilitiesHeaders.forEach((header) => {
-    if (header === "Name") {
-      utilitiesTotals[header] = "Total";
-    } else {
-      const sum = utilitiesData2025.reduce(
-        (sum, row) =>
-          typeof row[header as keyof typeof row] === "number"
-            ? sum + (row[header as keyof typeof row] as number)
-            : sum,
-        0
-      );
-      utilitiesTotals[header] = sum ? sum.toFixed(2) : "";
-    }
-  });
 
   // PassiveBloom state and fetch
   const [passiveBloomRows, setPassiveBloomRows] = useState<PassiveBloomRow[]>([]);
