@@ -124,6 +124,25 @@ export default function Home() {
     : 0;
   const percentDown = 100 - percentCovered;
 
+  // Prepare monthlyData for the donut/timeline chart
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const monthlyData = months.map((month) => {
+    const dividend = dividendIncome.reduce((sum, row) => {
+      const date = new Date(row.create_date);
+      const m = date.toLocaleString("en-US", { month: "long" });
+      return m === month ? sum + row.amount : sum;
+    }, 0);
+    const utility = utilityExpenses.reduce((sum, row) => {
+      const date = new Date(row.create_date);
+      const m = date.toLocaleString("en-US", { month: "long" });
+      return m === month ? sum + row.amount : sum;
+    }, 0);
+    return { month, dividend, utility };
+  });
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       {/* Logout link at top right */}
@@ -135,16 +154,16 @@ export default function Home() {
       <main className="flex flex-col gap-[64px] row-start-3 items-center sm:items-start">
         <div>
           <div className="flex flex-row items-center gap-10 my-4">
-            <div>
+            {/* <div>
               <div className="text-lg font-bold">
                 Total Dividend Income Amount: {totalDividendIncomeAmount.toFixed(2)}
               </div>
               <div className="text-lg font-bold">
                 Total Utility Expenses Amount: {totalUtilityExpensesAmount.toFixed(2)}
               </div>
-            </div>
+            </div> */}
             <div className="ml-16">
-              <DividendCoverageChart percentCovered={percentCovered} percentDown={percentDown} />
+              <DividendCoverageChart percentCovered={percentCovered} percentDown={percentDown} monthlyData={monthlyData} />
             </div>
           </div>
         </div>
