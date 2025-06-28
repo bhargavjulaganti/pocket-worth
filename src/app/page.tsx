@@ -117,6 +117,12 @@ export default function Home() {
     return null; // Will redirect to /login
   }
 
+  // Calculate percentage covered and down
+  const percentCovered = totalUtilityExpensesAmount > 0
+    ? Math.min((totalDividendAmount / totalUtilityExpensesAmount) * 100, 100)
+    : 0;
+  const percentDown = 100 - percentCovered;
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       {/* Logout link at top right */}
@@ -126,7 +132,6 @@ export default function Home() {
         </Link>
       </div>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-
         <div>
           {/* ...other components... */}
           <div className="my-4 text-lg font-bold">
@@ -134,6 +139,55 @@ export default function Home() {
           </div>
           <div className="my-4 text-lg font-bold">
             Total Utility Expenses Amount: {totalUtilityExpensesAmount.toFixed(2)}
+          </div>
+          {/* Percentage bar visualization */}
+          <div className="w-full max-w-md my-4">
+            <div className="mb-1 text-sm text-gray-700 font-semibold">Dividend Coverage</div>
+            <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="absolute left-0 top-0 h-full bg-green-500 rounded-full transition-all duration-500"
+                style={{ width: `${percentCovered}%` }}
+              ></div>
+              <div
+                className="absolute right-0 top-0 h-full bg-red-400 rounded-full transition-all duration-500"
+                style={{ width: `${percentDown}%` }}
+              ></div>
+              <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-900">
+                {percentCovered.toFixed(1)}% covered, {percentDown.toFixed(1)}% down
+              </div>
+            </div>
+          </div>
+          {/* Donut chart visualization */}
+          <div className="w-full max-w-xs my-4 flex flex-col items-center">
+            <div className="mb-1 text-sm text-gray-700 font-semibold">Dividend Coverage (Donut)</div>
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle
+                cx="60" cy="60" r="50"
+                fill="none"
+                stroke="#e5e7eb"
+                strokeWidth="18"
+              />
+              <circle
+                cx="60" cy="60" r="50"
+                fill="none"
+                stroke="#22c55e"
+                strokeWidth="18"
+                strokeDasharray={`${Math.PI * 100} ${(1 - percentCovered / 100) * Math.PI * 100}`}
+                strokeDashoffset={Math.PI * 50}
+                strokeLinecap="round"
+                style={{ transition: 'stroke-dasharray 0.5s' }}
+              />
+              <text
+                x="60" y="66"
+                textAnchor="middle"
+                fontSize="1.5rem"
+                fontWeight="bold"
+                fill="#222"
+              >
+                {percentCovered.toFixed(0)}%
+              </text>
+            </svg>
+            <div className="text-xs text-gray-600 mt-1">of utility expenses covered by dividends</div>
           </div>
           {/* ...other components... */}
         </div>
