@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface MonthlyDatum {
   month: string;
@@ -18,6 +18,36 @@ export function DividendCoverageChart({
   monthlyData,
 }: DividendCoverageChartProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  // Animated progress state
+  const [animatedPercent, setAnimatedPercent] = useState(percentCovered);
+  const requestRef = useRef<number | null>(null);
+  const prevPercentRef = useRef(percentCovered);
+
+  useEffect(() => {
+    let start: number | null = null;
+    const duration = 700; // ms
+    const initial = prevPercentRef.current;
+    const delta = percentCovered - initial;
+    function animate(ts: number) {
+      if (start === null) start = ts;
+      const elapsed = ts - start;
+      const progress = Math.min(elapsed / duration, 1);
+      setAnimatedPercent(initial + delta * progress);
+      if (progress < 1) {
+        requestRef.current = requestAnimationFrame(animate);
+      } else {
+        setAnimatedPercent(percentCovered);
+        prevPercentRef.current = percentCovered;
+      }
+    }
+    if (initial !== percentCovered) {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      requestRef.current = requestAnimationFrame(animate);
+    }
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [percentCovered]);
 
   return (
     <div className="w-full max-w-2xl my-4 flex flex-col items-center">
@@ -59,13 +89,13 @@ export function DividendCoverageChart({
             <div
               className="absolute left-0 top-0 h-8 rounded-l-full bg-green-500"
               style={{
-                width: `${percentCovered}%`,
+                width: `${animatedPercent}%`,
                 minWidth: 16,
-                transition: "width 0.5s",
+                transition: "width 0.2s linear",
               }}
             ></div>
             {showTooltip && (
-              <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full bg-white border border-gray-300 rounded px-2 py-1 text-xs shadow-lg z-10 whitespace-nowrap">
+              <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full border border-gray-300 rounded px-2 py-1 text-xs shadow-lg z-10 whitespace-nowrap">
                 {percentCovered.toFixed(1)}% covered
                 <br />
                 {percentDown.toFixed(1)}% to goal
