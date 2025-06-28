@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
-import { DividendWithSymbol } from "../utils/DividendData";
-import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
+import { DividendWithSymbol, fetchTotalDividendAmount } from "../utils/DividendData";
+import { fetchUtilityExpenses, UtilityExpense, fetchTotalUtilityExpensesAmount } from "../utils/UtilityExpenses";
 import { UtilityPivot } from "../utils/UtilityPivot";
 import { fetchDividendIncome, DividendIncome, DividendIncomePivot } from "../utils/DividendIncome";
 
@@ -15,6 +15,14 @@ export default function Home() {
   // PassiveBloom state and fetch
   const [passiveBloomRows, setPassiveBloomRows] = useState<PassiveBloomRow[]>([]);
   const [pbError, setPbError] = useState<string | null>(null);
+
+  const [totalDividendAmount, setTotalDividendAmount] = useState<number>(0);
+  const [totalUtilityExpensesAmount, setTotalUtilityExpensesAmount] = useState<number>(0);
+
+  useEffect(() => {
+    fetchTotalDividendAmount().then(setTotalDividendAmount);
+    fetchTotalUtilityExpensesAmount().then(setTotalUtilityExpensesAmount);
+  }, []);
 
   useEffect(() => {
     PassiveBloom.getAll()
@@ -118,6 +126,19 @@ export default function Home() {
         </Link>
       </div>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+
+        <div>
+          {/* ...other components... */}
+          <div className="my-4 text-lg font-bold">
+            Total Dividend Amount: {totalDividendAmount.toFixed(2)}
+          </div>
+          <div className="my-4 text-lg font-bold">
+            Total Utility Expenses Amount: {totalUtilityExpensesAmount.toFixed(2)}
+          </div>
+          {/* ...other components... */}
+        </div>
+
+
         {/* Utility Expenses by Month - move to top */}
         <div className="w-full flex justify-center">
           <div>

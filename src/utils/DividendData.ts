@@ -65,3 +65,15 @@ export async function fetchDividendsWithSymbol(): Promise<DividendWithSymbol[]> 
     amount: Number(row.amount),
   }));
 }
+
+export async function fetchTotalDividendAmount(): Promise<number> {
+  const { data, error } = await supabase
+    .from('dividends')
+    .select('amount');
+
+  if (error) {
+    console.error('Error fetching total dividend amount:', error);
+    return 0;
+  }
+  return (data ?? []).reduce((sum, row) => sum + Number(row.amount), 0);
+}
