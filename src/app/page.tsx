@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
-import { fetchDividendsWithSymbol, DividendWithSymbol } from "../utils/DividendData";
+import { DividendWithSymbol } from "../utils/DividendData";
 import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
 import { UtilityPivot } from "../utils/UtilityPivot";
+import { fetchDividendIncome, DividendIncome, DividendIncomePivot } from "../utils/DividendIncome";
 
 export default function Home() {
 
@@ -22,21 +23,10 @@ export default function Home() {
   }, []);
 
   // Supabase dividends with symbol state
-  const [dividends, setDividends] = useState<DividendWithSymbol[]>([]);
-  const [dividendsLoading, setDividendsLoading] = useState(true);
-  const [dividendsError, setDividendsError] = useState<string | null>(null);
+  const [dividends] = useState<DividendWithSymbol[]>([]);
+  
 
-  useEffect(() => {
-    fetchDividendsWithSymbol()
-      .then((data) => {
-        setDividends(data);
-        setDividendsLoading(false);
-      })
-      .catch((err) => {
-        setDividendsError(err.message);
-        setDividendsLoading(false);
-      });
-  }, []);
+
 
   // Utility expenses state
   const [utilityExpenses, setUtilityExpenses] = useState<UtilityExpense[]>([]);
@@ -55,22 +45,31 @@ export default function Home() {
       });
   }, []);
 
+  // Dividend income state
+  const [dividendIncome, setDividendIncome] = useState<DividendIncome[]>([]);
+  const [dividendIncomeLoading, setDividendIncomeLoading] = useState(true);
+  const [dividendIncomeError, setDividendIncomeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchDividendIncome()
+      .then((data) => {
+        setDividendIncome(data);
+        setDividendIncomeLoading(false);
+      })
+      .catch((err) => {
+        setDividendIncomeError(err.message);
+        setDividendIncomeLoading(false);
+      });
+  }, []);
+
   // --- Pivot utility expenses data for month-wise table ---
   const utilityMonthsOrder = UtilityPivot.monthsOrder;
   const utilityCategories = UtilityPivot.getCategories(utilityExpenses);
   const utilityPivotData = UtilityPivot.getPivotData(utilityExpenses);
   const utilityMonthTotals = UtilityPivot.getMonthTotals(utilityPivotData, utilityCategories);
 
-  // --- Pivot dividends data for month-wise table ---
-  const monthsOrder = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
 
-  // Get unique stock symbols in the order they appear
-  const stockSymbols = Array.from(
-    new Set(dividends.map((d) => d.stock_symbol))
-  );
+
 
   // Build pivot data: { [symbol]: { [month]: amount } }
   const pivotData: Record<string, Record<string, number>> = {};
@@ -79,6 +78,12 @@ export default function Home() {
     if (!pivotData[symbol]) pivotData[symbol] = {};
     pivotData[symbol][div.month] = Number(div.amount);
   });
+
+  // --- Pivot dividend income data for month-wise table ---
+  const dividendIncomeMonthsOrder = DividendIncomePivot.monthsOrder;
+  const dividendIncomeCategories = DividendIncomePivot.getCategories(dividendIncome);
+  const dividendIncomePivotData = DividendIncomePivot.getPivotData(dividendIncome);
+  const dividendIncomeMonthTotals = DividendIncomePivot.getMonthTotals(dividendIncomePivotData, dividendIncomeCategories);
 
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,39 +171,50 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Pivoted Dividends Table */}
-        <div className="w-full flex justify-center">
+        {/* Pivoted Dividend Income Table */}
+        <div className="w-full flex justify-center mt-8">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Dividends by Month</h2>
-            {dividendsLoading ? (
-              <div>Loading dividends...</div>
-            ) : dividendsError ? (
-              <div className="text-red-600">{dividendsError}</div>
+            <h2 className="text-xl font-semibold mb-4">Dividend Income by Month</h2>
+            {dividendIncomeLoading ? (
+              <div>Loading dividend income...</div>
+            ) : dividendIncomeError ? (
+              <div className="text-red-600">{dividendIncomeError}</div>
             ) : (
               <table className="border-collapse border">
                 <thead>
                   <tr className="bg-green-600 text-white">
-                    <th className="border border-gray-400 px-4 py-2">Stock</th>
-                    {monthsOrder.map((month) => (
+                    <th className="border border-gray-400 px-4 py-2">Name</th>
+                    {dividendIncomeMonthsOrder.map((month) => (
                       <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {stockSymbols.map((symbol) => (
-                    <tr key={symbol}>
-                      <td className="border border-gray-400 px-4 py-2 font-semibold">{symbol}</td>
-                      {monthsOrder.map((month) => (
+                  {dividendIncomeCategories.map((category) => (
+                    <tr key={category}>
+                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
+                      {dividendIncomeMonthsOrder.map((month) => (
                         <td key={month} className="border border-gray-400 px-4 py-2">
-                          {pivotData[symbol][month] !== undefined ? pivotData[symbol][month].toFixed(2) : ""}
+                          {dividendIncomePivotData[category][month] !== undefined
+                            ? dividendIncomePivotData[category][month].toFixed(2)
+                            : ""}
                         </td>
                       ))}
                     </tr>
                   ))}
-                  {stockSymbols.length === 0 && (
+                  {/* Total row */}
+                  <tr className="font-bold">
+                    <td className="border border-gray-400 px-4 py-2">Total</td>
+                    {dividendIncomeMonthsOrder.map((month) => (
+                      <td key={month} className="border border-gray-400 px-4 py-2">
+                        {dividendIncomeMonthTotals[month] ? dividendIncomeMonthTotals[month].toFixed(2) : ""}
+                      </td>
+                    ))}
+                  </tr>
+                  {dividendIncomeCategories.length === 0 && (
                     <tr>
-                      <td colSpan={monthsOrder.length + 1} className="text-center py-4">
-                        No dividend data found.
+                      <td colSpan={dividendIncomeMonthsOrder.length + 1} className="text-center py-4">
+                        No dividend income found.
                       </td>
                     </tr>
                   )}
@@ -207,6 +223,8 @@ export default function Home() {
             )}
           </div>
         </div>
+
+
 
         {/* PassiveBloom Table - move to bottom */}
         <div className="w-full flex justify-center mt-8">
@@ -242,6 +260,7 @@ export default function Home() {
             </table>
           </div>
         </div>
+
       </main>
       {/* Remove the logout link from the footer */}
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
