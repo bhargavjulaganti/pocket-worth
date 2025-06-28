@@ -13,13 +13,6 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    // if (email !== DEFAULT_EMAIL || password !== DEFAULT_PASSWORD) {
-    //   setError("Invalid credentials. Please use the default admin credentials.");
-    //   return;
-    // }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/");

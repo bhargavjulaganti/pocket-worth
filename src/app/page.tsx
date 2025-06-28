@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
-import { DividendWithSymbol, fetchTotalDividendAmount } from "../utils/DividendData";
+// import { DividendWithSymbol, fetchTotalDividendAmount } from "../utils/DividendData";
 import { fetchUtilityExpenses, UtilityExpense, fetchTotalUtilityExpensesAmount } from "../utils/UtilityExpenses";
 import { UtilityPivot } from "../utils/UtilityPivot";
-import { fetchDividendIncome, DividendIncome, DividendIncomePivot } from "../utils/DividendIncome";
+import { fetchDividendIncome, DividendIncome, DividendIncomePivot, fetchTotalDividendIncomeAmount } from "../utils/DividendIncome";
+import { DividendCoverageChart } from "./components/DividendCoverageChart";
 
 export default function Home() {
 
@@ -16,11 +17,12 @@ export default function Home() {
   const [passiveBloomRows, setPassiveBloomRows] = useState<PassiveBloomRow[]>([]);
   const [pbError, setPbError] = useState<string | null>(null);
 
-  const [totalDividendAmount, setTotalDividendAmount] = useState<number>(0);
+  // const [totalDividendAmount, setTotalDividendAmount] = useState<number>(0);
   const [totalUtilityExpensesAmount, setTotalUtilityExpensesAmount] = useState<number>(0);
+  const [totalDividendIncomeAmount, setTotalDividendIncomeAmount] = useState<number>(0);
 
   useEffect(() => {
-    fetchTotalDividendAmount().then(setTotalDividendAmount);
+    fetchTotalDividendIncomeAmount().then(setTotalDividendIncomeAmount);
     fetchTotalUtilityExpensesAmount().then(setTotalUtilityExpensesAmount);
   }, []);
 
@@ -31,7 +33,7 @@ export default function Home() {
   }, []);
 
   // Supabase dividends with symbol state
-  const [dividends] = useState<DividendWithSymbol[]>([]);
+  // const [dividends] = useState<DividendWithSymbol[]>([]);
   
 
 
@@ -80,12 +82,12 @@ export default function Home() {
 
 
   // Build pivot data: { [symbol]: { [month]: amount } }
-  const pivotData: Record<string, Record<string, number>> = {};
-  dividends.forEach((div) => {
-    const symbol = div.stock_symbol;
-    if (!pivotData[symbol]) pivotData[symbol] = {};
-    pivotData[symbol][div.month] = Number(div.amount);
-  });
+  // const pivotData: Record<string, Record<string, number>> = {};
+  // dividends.forEach((div) => {
+  //   const symbol = div.stock_symbol;
+  //   if (!pivotData[symbol]) pivotData[symbol] = {};
+  //   pivotData[symbol][div.month] = Number(div.amount);
+  // });
 
   // --- Pivot dividend income data for month-wise table ---
   const dividendIncomeMonthsOrder = DividendIncomePivot.monthsOrder;
@@ -94,7 +96,6 @@ export default function Home() {
   const dividendIncomeMonthTotals = DividendIncomePivot.getMonthTotals(dividendIncomePivotData, dividendIncomeCategories);
 
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
@@ -117,9 +118,9 @@ export default function Home() {
     return null; // Will redirect to /login
   }
 
-  // Calculate percentage covered and down
+  // Calculate percentage covered and down (using dividend_income)
   const percentCovered = totalUtilityExpensesAmount > 0
-    ? Math.min((totalDividendAmount / totalUtilityExpensesAmount) * 100, 100)
+    ? Math.min((totalDividendIncomeAmount / totalUtilityExpensesAmount) * 100, 100)
     : 0;
   const percentDown = 100 - percentCovered;
 
@@ -131,65 +132,21 @@ export default function Home() {
           Logout
         </Link>
       </div>
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-[64px] row-start-3 items-center sm:items-start">
         <div>
-          {/* ...other components... */}
-          <div className="my-4 text-lg font-bold">
-            Total Dividend Amount: {totalDividendAmount.toFixed(2)}
-          </div>
-          <div className="my-4 text-lg font-bold">
-            Total Utility Expenses Amount: {totalUtilityExpensesAmount.toFixed(2)}
-          </div>
-          {/* Percentage bar visualization */}
-          <div className="w-full max-w-md my-4">
-            <div className="mb-1 text-sm text-gray-700 font-semibold">Dividend Coverage</div>
-            <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="absolute left-0 top-0 h-full bg-green-500 rounded-full transition-all duration-500"
-                style={{ width: `${percentCovered}%` }}
-              ></div>
-              <div
-                className="absolute right-0 top-0 h-full bg-red-400 rounded-full transition-all duration-500"
-                style={{ width: `${percentDown}%` }}
-              ></div>
-              <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-900">
-                {percentCovered.toFixed(1)}% covered, {percentDown.toFixed(1)}% down
+          <div className="flex flex-row items-center gap-10 my-4">
+            <div>
+              <div className="text-lg font-bold">
+                Total Dividend Income Amount: {totalDividendIncomeAmount.toFixed(2)}
+              </div>
+              <div className="text-lg font-bold">
+                Total Utility Expenses Amount: {totalUtilityExpensesAmount.toFixed(2)}
               </div>
             </div>
+            <div className="ml-16">
+              <DividendCoverageChart percentCovered={percentCovered} percentDown={percentDown} />
+            </div>
           </div>
-          {/* Donut chart visualization */}
-          <div className="w-full max-w-xs my-4 flex flex-col items-center">
-            <div className="mb-1 text-sm text-gray-700 font-semibold">Dividend Coverage (Donut)</div>
-            <svg width="120" height="120" viewBox="0 0 120 120">
-              <circle
-                cx="60" cy="60" r="50"
-                fill="none"
-                stroke="#e5e7eb"
-                strokeWidth="18"
-              />
-              <circle
-                cx="60" cy="60" r="50"
-                fill="none"
-                stroke="#22c55e"
-                strokeWidth="18"
-                strokeDasharray={`${Math.PI * 100} ${(1 - percentCovered / 100) * Math.PI * 100}`}
-                strokeDashoffset={Math.PI * 50}
-                strokeLinecap="round"
-                style={{ transition: 'stroke-dasharray 0.5s' }}
-              />
-              <text
-                x="60" y="66"
-                textAnchor="middle"
-                fontSize="1.5rem"
-                fontWeight="bold"
-                fill="#222"
-              >
-                {percentCovered.toFixed(0)}%
-              </text>
-            </svg>
-            <div className="text-xs text-gray-600 mt-1">of utility expenses covered by dividends</div>
-          </div>
-          {/* ...other components... */}
         </div>
 
 

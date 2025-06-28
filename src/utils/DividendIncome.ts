@@ -26,6 +26,18 @@ export async function fetchDividendIncome(): Promise<DividendIncome[]> {
   }));
 }
 
+export async function fetchTotalDividendIncomeAmount(): Promise<number> {
+  const { data, error } = await supabase
+    .from('dividend_income')
+    .select('amount');
+
+  if (error) {
+    console.error('Error fetching total dividend income amount:', error);
+    return 0;
+  }
+  return (data ?? []).reduce((sum, row) => sum + Number(row.amount), 0);
+}
+
 export class DividendIncomePivot {
   static monthsOrder = [
     "January", "February", "March", "April", "May", "June",
