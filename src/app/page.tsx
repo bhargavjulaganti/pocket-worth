@@ -121,7 +121,7 @@ export default function Home() {
   const [secondsLeft, setSecondsLeft] = useState(30);
   const logoutTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const INACTIVITY_LIMIT = 1 * 60 * 1000; // 1 minute
+  const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
   const POPUP_DURATION = 30; // seconds
 
   // Logout function
