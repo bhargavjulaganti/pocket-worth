@@ -82,7 +82,6 @@ export default function Home() {
 
 
   // Build pivot data: { [symbol]: { [month]: amount } }
-  // const pivotData: Record<string, Record<string, number>> = {};
   // dividends.forEach((div) => {
   //   const symbol = div.stock_symbol;
   //   if (!pivotData[symbol]) pivotData[symbol] = {};
@@ -109,6 +108,9 @@ export default function Home() {
     });
     return () => unsubscribe();
   }, [router]);
+
+  const [dividendCardMinimized, setDividendCardMinimized] = useState(false);
+  const [utilityCardMinimized, setUtilityCardMinimized] = useState(false);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -169,109 +171,157 @@ export default function Home() {
         </div>
 
 
-        {/* Utility Expenses by Month - move to top */}
-        <div className="w-full flex justify-center">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Utility Expenses by Month</h2>
-            {utilityExpensesLoading ? (
-              <div>Loading utility expenses...</div>
-            ) : utilityExpensesError ? (
-              <div className="text-red-600">{utilityExpensesError}</div>
-            ) : (
-              <table className="border-collapse border">
+        {/* Utility Expenses Modern Card with Minimize/Maximize */}
+        <div className="w-full flex justify-center mt-8">
+          <div className="bg-gray-900 rounded-2xl shadow-lg p-8 w-full max-w-5xl border border-gray-800 relative">
+            {/* Minimize/Maximize Button */}
+            <button
+              onClick={() => setUtilityCardMinimized((prev) => !prev)}
+              className="absolute top-4 right-4 p-2 rounded hover:bg-gray-800 transition"
+              aria-label={utilityCardMinimized ? "Maximize" : "Minimize"}
+            >
+              {utilityCardMinimized ? (
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 15l6-6 6 6"/></svg>
+              ) : (
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6"/></svg>
+              )}
+            </button>
+            {/* Header */}
+            <div className="flex items-center mb-4">
+              <div className="flex items-center gap-2">
+                <span className="bg-cyan-100 text-cyan-600 rounded-full p-2"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15.93V18a1 1 0 11-2 0v-1.07A8.001 8.001 0 014.07 13H6a1 1 0 110 2H4.07A8.001 8.001 0 0111 4.07V6a1 1 0 112 0V4.07A8.001 8.001 0 0119.93 11H18a1 1 0 110-2h1.93A8.001 8.001 0 0113 19.93z"></path></svg></span>
+                <span className="text-white text-xl font-semibold">Utility Expenses</span>
+              </div>
+              <span className="ml-4 text-gray-300 text-base">Total: <span className="font-semibold">${totalUtilityExpensesAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></span>
+            </div>
+            {/* Category List (hide if minimized) */}
+            {!utilityCardMinimized && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                <div className="flex flex-col gap-1">
+                  {utilityCategories.map((category) => (
+                    <div key={category} className="flex justify-between w-56">
+                      <span className="text-gray-100 font-medium">{category}</span>
+                      <span className="text-cyan-400 font-semibold">${utilityPivotData[category] ? Object.values(utilityPivotData[category]).reduce((sum, v) => sum + (v || 0), 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Divider (hide if minimized) */}
+            {!utilityCardMinimized && <hr className="my-4 border-gray-700" />}
+            {/* Table always visible */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-green-600 text-white">
-                    <th className="border border-gray-400 px-4 py-2">Name</th>
+                  <tr className="bg-gray-800 text-gray-300">
+                    <th className="text-left p-3 font-medium">Category</th>
                     {utilityMonthsOrder.map((month) => (
-                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
+                      <th key={month} className="text-center p-3 font-medium">{month.slice(0, 3)}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {utilityCategories.map((category) => (
-                    <tr key={category}>
-                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
+                    <tr key={category} className="border-b border-gray-800">
+                      <td className="p-3 font-medium text-gray-100">{category}</td>
                       {utilityMonthsOrder.map((month) => (
-                        <td key={month} className="border border-gray-400 px-4 py-2">
-                          {utilityPivotData[category][month] !== undefined
-                            ? utilityPivotData[category][month].toFixed(2)
-                            : ""}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                  {/* Total row */}
-                  <tr className="font-bold" >
-                    <td className="border border-gray-400 px-4 py-2">Total</td>
-                    {utilityMonthsOrder.map((month) => (
-                      <td key={month} className="border border-gray-400 px-4 py-2">
-                        {utilityMonthTotals[month] ? utilityMonthTotals[month].toFixed(2) : ""}
-                      </td>
-                    ))}
-                  </tr>
-                  {utilityCategories.length === 0 && (
-                    <tr>
-                      <td colSpan={utilityMonthsOrder.length + 1} className="text-center py-4">
-                        No utility expenses found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-
-        {/* Pivoted Dividend Income Table */}
-        <div className="w-full flex justify-center mt-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Dividend Income by Month</h2>
-            {dividendIncomeLoading ? (
-              <div>Loading dividend income...</div>
-            ) : dividendIncomeError ? (
-              <div className="text-red-600">{dividendIncomeError}</div>
-            ) : (
-              <table className="border-collapse border">
-                <thead>
-                  <tr className="bg-green-600 text-white">
-                    <th className="border border-gray-400 px-4 py-2">Name</th>
-                    {dividendIncomeMonthsOrder.map((month) => (
-                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {dividendIncomeCategories.map((category) => (
-                    <tr key={category}>
-                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
-                      {dividendIncomeMonthsOrder.map((month) => (
-                        <td key={month} className="border border-gray-400 px-4 py-2">
-                          {dividendIncomePivotData[category][month] !== undefined
-                            ? dividendIncomePivotData[category][month].toFixed(2)
-                            : ""}
+                        <td key={month} className="p-3 text-center text-gray-200">
+                          {utilityPivotData[category][month] && utilityPivotData[category][month] > 0
+                            ? `$${utilityPivotData[category][month].toFixed(0)}`
+                            : "-"}
                         </td>
                       ))}
                     </tr>
                   ))}
                   {/* Total row */}
                   <tr className="font-bold">
-                    <td className="border border-gray-400 px-4 py-2">Total</td>
-                    {dividendIncomeMonthsOrder.map((month) => (
-                      <td key={month} className="border border-gray-400 px-4 py-2">
-                        {dividendIncomeMonthTotals[month] ? dividendIncomeMonthTotals[month].toFixed(2) : ""}
+                    <td className="p-3 font-medium text-gray-100">Total</td>
+                    {utilityMonthsOrder.map((month) => (
+                      <td key={month} className="p-3 text-center text-gray-200">
+                        {utilityMonthTotals[month] && utilityMonthTotals[month] > 0
+                          ? `$${utilityMonthTotals[month].toFixed(0)}`
+                          : "-"}
                       </td>
                     ))}
                   </tr>
-                  {dividendIncomeCategories.length === 0 && (
+                  {utilityCategories.length === 0 && (
                     <tr>
-                      <td colSpan={dividendIncomeMonthsOrder.length + 1} className="text-center py-4">
-                        No dividend income found.
+                      <td colSpan={utilityMonthsOrder.length + 1} className="text-center py-4 text-gray-400">
+                        No utility expenses found.
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Dividend Income Modern Card with Minimize/Maximize */}
+        <div className="w-full flex justify-center mt-8">
+          <div className="bg-gray-900 rounded-2xl shadow-lg p-8 w-full max-w-5xl border border-gray-800 relative">
+            {/* Minimize/Maximize Button */}
+            <button
+              onClick={() => setDividendCardMinimized((prev) => !prev)}
+              className="absolute top-4 right-4 p-2 rounded hover:bg-gray-800 transition"
+              aria-label={dividendCardMinimized ? "Maximize" : "Minimize"}
+            >
+              {dividendCardMinimized ? (
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 15l6-6 6 6"/></svg>
+              ) : (
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6"/></svg>
+              )}
+            </button>
+            {/* Header */}
+            <div className="flex items-center mb-4">
+              <div className="flex items-center gap-2">
+                <span className="bg-green-100 text-green-600 rounded-full p-2"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15.93V18a1 1 0 11-2 0v-1.07A8.001 8.001 0 014.07 13H6a1 1 0 110 2H4.07A8.001 8.001 0 0111 4.07V6a1 1 0 112 0V4.07A8.001 8.001 0 0119.93 11H18a1 1 0 110-2h1.93A8.001 8.001 0 0113 19.93z"></path></svg></span>
+                <span className="text-white text-xl font-semibold">Dividend Income</span>
+              </div>
+              <span className="ml-4 text-gray-300 text-base">Total: <span className="font-semibold">${totalDividendIncomeAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></span>
+            </div>
+            {/* Category List (hide if minimized) */}
+            {!dividendCardMinimized && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                <div className="flex flex-col gap-1">
+                  {dividendIncomeCategories.map((category) => (
+                    <div key={category} className="flex justify-between w-56">
+                      <span className="text-gray-100 font-medium">{category}</span>
+                      <span className="text-green-400 font-semibold">${dividendIncomePivotData[category] ? Object.values(dividendIncomePivotData[category]).reduce((sum, v) => sum + (v || 0), 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
+            {/* Divider (hide if minimized) */}
+            {!dividendCardMinimized && <hr className="my-4 border-gray-700" />}
+            {/* Table always visible */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-800 text-gray-300">
+                    <th className="text-left p-3 font-medium">Category</th>
+                    {dividendIncomeMonthsOrder.map((month) => (
+                      <th key={month} className="text-center p-3 font-medium">{month.slice(0, 3)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dividendIncomeCategories.map((category) => (
+                    <tr key={category} className="border-b border-gray-800">
+                      <td className="p-3 font-medium text-gray-100">{category}</td>
+                      {dividendIncomeMonthsOrder.map((month) => (
+                        <td key={month} className="p-3 text-center text-gray-200">
+                          {dividendIncomePivotData[category][month] && dividendIncomePivotData[category][month] > 0
+                            ? `$${dividendIncomePivotData[category][month].toFixed(0)}`
+                            : "-"}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
