@@ -167,25 +167,26 @@ export default function Home() {
 
 
         {/* Utility Expenses Modern Card with Minimize/Maximize */}
-        <UtilityTable
-          minimized={utilityCardMinimized}
-          onToggle={() => setUtilityCardMinimized((prev) => !prev)}
-          total={totalUtilityExpensesAmount}
-          categories={utilityCategories}
-          monthsOrder={utilityMonthsOrder}
-          pivotData={utilityPivotData}
-          monthTotals={utilityMonthTotals}
-        />
-
-        {/* Dividend Income Modern Card with Minimize/Maximize */}
-        <DividendTable
-          minimized={dividendCardMinimized}
-          onToggle={() => setDividendCardMinimized((prev) => !prev)}
-          total={totalDividendIncomeAmount}
-          categories={dividendIncomeCategories}
-          monthsOrder={dividendIncomeMonthsOrder}
-          pivotData={dividendIncomePivotData}
-        />
+        {/* Dividend and Utility Tables Side by Side */}
+        <div className="w-full flex flex-col lg:flex-row gap-8 justify-center mt-8">
+          <UtilityTable
+            minimized={utilityCardMinimized}
+            onToggle={() => setUtilityCardMinimized((prev) => !prev)}
+            total={totalUtilityExpensesAmount}
+            categories={utilityCategories}
+            monthsOrder={utilityMonthsOrder}
+            pivotData={utilityPivotData}
+            monthTotals={utilityMonthTotals}
+          />
+          <DividendTable
+            minimized={dividendCardMinimized}
+            onToggle={() => setDividendCardMinimized((prev) => !prev)}
+            total={totalDividendIncomeAmount}
+            categories={dividendIncomeCategories}
+            monthsOrder={dividendIncomeMonthsOrder}
+            pivotData={dividendIncomePivotData}
+          />
+        </div>
 
         {/* PassiveBloom Table - move to bottom */}
         <PassiveBloomTable rows={passiveBloomRows} error={pbError} />
