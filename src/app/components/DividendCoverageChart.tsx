@@ -50,13 +50,12 @@ export function DividendCoverageChart({
   }, [percentCovered]);
 
   return (
-    <div className="w-full max-w-2xl my-4 flex flex-col items-center">
-      {/* KPI Tiles + Progress Thermometer Row */}
+    <div className="w-full flex flex-col items-center justify-center min-h-[300px]">
+      {/* KPI Tiles */}
       <div className="w-full flex flex-row items-center justify-center gap-4 mb-4">
-        {/* KPI Tiles */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {/* Total Dividend */}
-          <button
+          {/* <button
             className="flex flex-col items-center bg-white rounded-lg shadow hover:shadow-md transition p-2 border border-gray-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-yellow-400"
             title="View Dividend History">
             <span className="text-2xl">💵</span>
@@ -64,9 +63,9 @@ export function DividendCoverageChart({
             <span className="font-bold text-lg text-yellow-600">
               {monthlyData.reduce((sum, d) => sum + d.dividend, 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </span>
-          </button>
+          </button> */}
           {/* Total Utility */}
-          <div
+          {/* <div
             className="flex flex-col items-center bg-white rounded-lg shadow hover:shadow-md transition p-2 border border-gray-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-400"
             title="View Utility History">
             <span className="text-2xl">⚡</span>
@@ -74,42 +73,62 @@ export function DividendCoverageChart({
             <span className="font-bold text-lg text-cyan-600">
               {monthlyData.reduce((sum, d) => sum + d.utility, 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </span>
-          </div>
+          </div> */}
         </div>
-        {/* Progress Thermometer (Horizontal) */}
-        <div className="flex flex-col items-center min-w-[18rem]">
-          <div className="mb-1 text-sm text-gray-700 font-semibold">
+      </div>
+      {/* Progress Thermometer (Horizontal, Glassmorphism) - Centered */}
+      <div className="flex flex-col items-center justify-center w-full">
+        <div className="flex flex-col items-center min-w-[24rem] w-full max-w-3xl justify-center mx-auto">
+          <div className="mb-1 text-sm text-gray-700 dark:text-gray-200 font-semibold text-center">
             Progress Thermometer
           </div>
           <div
-            className="relative w-64 h-8 bg-gray-200 rounded-full flex items-center cursor-pointer"
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
+            className="relative w-full max-w-3xl p-4 rounded-2xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-md shadow-lg border border-white/20 dark:border-gray-700 flex flex-col items-center"
           >
-            <div
-              className="absolute left-0 top-0 h-8 rounded-l-full bg-green-500"
-              style={{
-                width: `${animatedPercent}%`,
-                minWidth: 16,
-                transition: "width 0.2s linear",
-              }}
-            ></div>
-            {showTooltip && (
-              <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full border border-gray-300 rounded px-2 py-1 text-xs shadow-lg z-10 whitespace-nowrap">
-                {percentCovered.toFixed(1)}% covered
-                <br />
-                {percentDown.toFixed(1)}% to goal
-                <br />
-                {percentDown > 0
-                  ? `Need ${percentDown.toFixed(1)}% more to hit 100%`
-                  : "Goal reached!"}
+            <div className="w-full flex items-center gap-2">
+              {/* Progress Bar */}
+              <div className="relative flex-1 h-5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className={`absolute left-0 top-0 h-5 rounded-full transition-all duration-500 ${
+                    animatedPercent >= 100
+                      ? 'bg-green-500'
+                      : animatedPercent >= 80
+                      ? 'bg-yellow-400'
+                      : 'bg-blue-500'
+                  }`}
+                  style={{
+                    width: `${Math.min(animatedPercent, 100)}%`,
+                  }}
+                ></div>
               </div>
-            )}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex justify-center w-8">
-              <span className="text-xs font-bold text-gray-700">0%</span>
+              {/* Pill-style Percentage Badge */}
+              <div
+                className={`ml-2 px-3 py-1 rounded-full text-xs font-semibold shadow-md border border-white/30 dark:border-gray-700 transition-colors duration-300 ${
+                  animatedPercent >= 100
+                    ? 'bg-green-500 text-white'
+                    : animatedPercent >= 80
+                    ? 'bg-yellow-400 text-gray-900'
+                    : 'bg-blue-500 text-white'
+                }`}
+                title="Percent Covered"
+              >
+                {animatedPercent.toFixed(1)}%
+              </div>
             </div>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex justify-center w-8">
-              <span className="text-xs font-bold text-gray-700">100%</span>
+            {/* Min/Max Labels */}
+            <div className="flex justify-between w-full mt-1 px-1">
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">0%</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">100%</span>
+            </div>
+            {/* Caption for Remaining Amount */}
+            <div className="mt-2 text-xs font-medium text-center">
+              {percentDown > 0 ? (
+                <span className="text-blue-600 dark:text-blue-300">
+                  {`$${((percentDown / 100) * monthlyData.reduce((sum, d) => sum + d.utility, 0)).toLocaleString(undefined, { maximumFractionDigits: 0 })} left to reach your goal`}
+                </span>
+              ) : (
+                <span className="text-green-600 dark:text-green-400">Goal reached! 🎉</span>
+              )}
             </div>
           </div>
         </div>
