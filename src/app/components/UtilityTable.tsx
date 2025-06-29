@@ -11,7 +11,7 @@ interface UtilityTableProps {
 }
 
 const UtilityTable: React.FC<UtilityTableProps> = ({ minimized, onToggle, total, categories, monthsOrder, pivotData, monthTotals }) => (
-  <div className="bg-gray-900 rounded-2xl shadow-lg p-8 w-full max-w-5xl border border-gray-800 relative">
+  <div className="bg-gray-900 rounded-2xl shadow-lg p-6 w-full max-w-3xl border border-gray-800 relative">
     {/* Minimize/Maximize Button */}
     <button
       onClick={onToggle}
