@@ -163,7 +163,7 @@ export default function Home() {
       if (logoutTimeoutRef.current) clearTimeout(logoutTimeoutRef.current);
       if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
     };
-  }, []);
+  }, [resetInactivityTimer]);
 
   // Stay logged in handler
   const handleStayLoggedIn = () => {

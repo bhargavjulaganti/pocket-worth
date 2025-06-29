@@ -62,7 +62,7 @@ export default function LoginPage() {
             try {
               await signInWithGoogle();
               router.push("/");
-            } catch (err) {
+            } catch {
               setError("Google sign-in failed");
             }
           }}
