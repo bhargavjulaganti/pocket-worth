@@ -16,6 +16,13 @@ const eslintConfig = [
       "no-console": "off",
       "react-hooks/exhaustive-deps": "warn",
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          varsIgnorePattern:
+            "^(utilityExpensesLoading|utilityExpensesError|dividendIncomeLoading|dividendIncomeError|dividendIncomeMonthTotals)$",
+        },
+      ],
     },
   },
 ];

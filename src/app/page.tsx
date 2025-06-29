@@ -10,6 +10,9 @@ import { fetchUtilityExpenses, UtilityExpense, fetchTotalUtilityExpensesAmount }
 import { UtilityPivot } from "../utils/UtilityPivot";
 import { fetchDividendIncome, DividendIncome, DividendIncomePivot, fetchTotalDividendIncomeAmount } from "../utils/DividendIncome";
 import { DividendCoverageChart } from "./components/DividendCoverageChart";
+import DividendTable from "./components/DividendTable";
+import UtilityTable from "./components/UtilityTable";
+import PassiveBloomTable from "./components/PassiveBloomTable";
 
 export default function Home() {
 
@@ -82,7 +85,6 @@ export default function Home() {
 
 
   // Build pivot data: { [symbol]: { [month]: amount } }
-  // const pivotData: Record<string, Record<string, number>> = {};
   // dividends.forEach((div) => {
   //   const symbol = div.stock_symbol;
   //   if (!pivotData[symbol]) pivotData[symbol] = {};
@@ -109,6 +111,9 @@ export default function Home() {
     });
     return () => unsubscribe();
   }, [router]);
+
+  const [dividendCardMinimized, setDividendCardMinimized] = useState(true);
+  const [utilityCardMinimized, setUtilityCardMinimized] = useState(true);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -154,14 +159,6 @@ export default function Home() {
       <main className="flex flex-col gap-[64px] row-start-3 items-center sm:items-start">
         <div>
           <div className="flex flex-row items-center gap-10 my-4">
-            {/* <div>
-              <div className="text-lg font-bold">
-                Total Dividend Income Amount: {totalDividendIncomeAmount.toFixed(2)}
-              </div>
-              <div className="text-lg font-bold">
-                Total Utility Expenses Amount: {totalUtilityExpensesAmount.toFixed(2)}
-              </div>
-            </div> */}
             <div className="ml-16">
               <DividendCoverageChart percentCovered={percentCovered} percentDown={percentDown} monthlyData={monthlyData} />
             </div>
@@ -169,148 +166,30 @@ export default function Home() {
         </div>
 
 
-        {/* Utility Expenses by Month - move to top */}
-        <div className="w-full flex justify-center">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Utility Expenses by Month</h2>
-            {utilityExpensesLoading ? (
-              <div>Loading utility expenses...</div>
-            ) : utilityExpensesError ? (
-              <div className="text-red-600">{utilityExpensesError}</div>
-            ) : (
-              <table className="border-collapse border">
-                <thead>
-                  <tr className="bg-green-600 text-white">
-                    <th className="border border-gray-400 px-4 py-2">Name</th>
-                    {utilityMonthsOrder.map((month) => (
-                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {utilityCategories.map((category) => (
-                    <tr key={category}>
-                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
-                      {utilityMonthsOrder.map((month) => (
-                        <td key={month} className="border border-gray-400 px-4 py-2">
-                          {utilityPivotData[category][month] !== undefined
-                            ? utilityPivotData[category][month].toFixed(2)
-                            : ""}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                  {/* Total row */}
-                  <tr className="font-bold" >
-                    <td className="border border-gray-400 px-4 py-2">Total</td>
-                    {utilityMonthsOrder.map((month) => (
-                      <td key={month} className="border border-gray-400 px-4 py-2">
-                        {utilityMonthTotals[month] ? utilityMonthTotals[month].toFixed(2) : ""}
-                      </td>
-                    ))}
-                  </tr>
-                  {utilityCategories.length === 0 && (
-                    <tr>
-                      <td colSpan={utilityMonthsOrder.length + 1} className="text-center py-4">
-                        No utility expenses found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
+        {/* Utility Expenses Modern Card with Minimize/Maximize */}
+        {/* Dividend and Utility Tables Side by Side */}
+        <div className="w-full flex flex-col lg:flex-row gap-8 justify-center mt-8">
+          <UtilityTable
+            minimized={utilityCardMinimized}
+            onToggle={() => setUtilityCardMinimized((prev) => !prev)}
+            total={totalUtilityExpensesAmount}
+            categories={utilityCategories}
+            monthsOrder={utilityMonthsOrder}
+            pivotData={utilityPivotData}
+            monthTotals={utilityMonthTotals}
+          />
+          <DividendTable
+            minimized={dividendCardMinimized}
+            onToggle={() => setDividendCardMinimized((prev) => !prev)}
+            total={totalDividendIncomeAmount}
+            categories={dividendIncomeCategories}
+            monthsOrder={dividendIncomeMonthsOrder}
+            pivotData={dividendIncomePivotData}
+          />
         </div>
-
-        {/* Pivoted Dividend Income Table */}
-        <div className="w-full flex justify-center mt-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Dividend Income by Month</h2>
-            {dividendIncomeLoading ? (
-              <div>Loading dividend income...</div>
-            ) : dividendIncomeError ? (
-              <div className="text-red-600">{dividendIncomeError}</div>
-            ) : (
-              <table className="border-collapse border">
-                <thead>
-                  <tr className="bg-green-600 text-white">
-                    <th className="border border-gray-400 px-4 py-2">Name</th>
-                    {dividendIncomeMonthsOrder.map((month) => (
-                      <th key={month} className="border border-gray-400 px-4 py-2">{month}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {dividendIncomeCategories.map((category) => (
-                    <tr key={category}>
-                      <td className="border border-gray-400 px-4 py-2 font-semibold">{category}</td>
-                      {dividendIncomeMonthsOrder.map((month) => (
-                        <td key={month} className="border border-gray-400 px-4 py-2">
-                          {dividendIncomePivotData[category][month] !== undefined
-                            ? dividendIncomePivotData[category][month].toFixed(2)
-                            : ""}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                  {/* Total row */}
-                  <tr className="font-bold">
-                    <td className="border border-gray-400 px-4 py-2">Total</td>
-                    {dividendIncomeMonthsOrder.map((month) => (
-                      <td key={month} className="border border-gray-400 px-4 py-2">
-                        {dividendIncomeMonthTotals[month] ? dividendIncomeMonthTotals[month].toFixed(2) : ""}
-                      </td>
-                    ))}
-                  </tr>
-                  {dividendIncomeCategories.length === 0 && (
-                    <tr>
-                      <td colSpan={dividendIncomeMonthsOrder.length + 1} className="text-center py-4">
-                        No dividend income found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-
-
 
         {/* PassiveBloom Table - move to bottom */}
-        <div className="w-full flex justify-center mt-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">PassiveBloom Data</h2>
-            {pbError && <div className="text-red-600 mb-2">{pbError}</div>}
-            <table className="border-collapse border">
-              <thead>
-                <tr className="bg-green-600 text-white">
-                  <th className="border border-gray-400 px-4 py-2">ID</th>
-                  <th className="border border-gray-400 px-4 py-2">Created At</th>
-                  <th className="border border-gray-400 px-4 py-2">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {passiveBloomRows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="border border-gray-400 px-4 py-2">{row.id}</td>
-                    <td className="border border-gray-400 px-4 py-2">
-                      {row.created_at ? row.created_at.slice(0, 10) : ""}
-                    </td>
-                    <td className="border border-gray-400 px-4 py-2">{row.amount}</td>
-                  </tr>
-                ))}
-                {passiveBloomRows.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="text-center py-4">
-                      No data found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <PassiveBloomTable rows={passiveBloomRows} error={pbError} />
 
       </main>
       {/* Remove the logout link from the footer */}
