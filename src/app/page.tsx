@@ -112,8 +112,8 @@ export default function Home() {
     return () => unsubscribe();
   }, [router]);
 
-  const [dividendCardMinimized, setDividendCardMinimized] = useState(false);
-  const [utilityCardMinimized, setUtilityCardMinimized] = useState(false);
+  const [dividendCardMinimized, setDividendCardMinimized] = useState(true);
+  const [utilityCardMinimized, setUtilityCardMinimized] = useState(true);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
