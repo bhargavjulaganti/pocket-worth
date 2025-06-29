@@ -5,7 +5,7 @@ interface PassiveBloomTableProps {
   error?: string | null;
 }
 
-const PassiveBloomTable: React.FC<PassiveBloomTableProps> = ({ rows, error }) => {
+const PassiveBloomTable: React.FC<PassiveBloomTableProps> = ({ rows }) => {
   return (
     <div className="w-full flex justify-center mt-8">
       <div className="bg-gray-900 rounded-2xl shadow-lg p-6 w-full max-w-3xl border border-gray-800 relative">
@@ -31,7 +31,7 @@ const PassiveBloomTable: React.FC<PassiveBloomTableProps> = ({ rows, error }) =>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, idx) => (
+              {rows.map((row) => (
                 <tr key={row.id} className="border-b border-gray-800">
                   <td className="p-3 flex items-center gap-2 text-gray-100">
                     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@ const PassiveBloomTable: React.FC<PassiveBloomTableProps> = ({ rows, error }) =>
                         })
                       : "-"}
                   </td>
-                  <td className="p-3 font-semibold text-green-400 text-lg">
+                  <td className="p-3 font-semibold text-lg">
                     ${row.amount.toLocaleString()}
                   </td>
                 </tr>
