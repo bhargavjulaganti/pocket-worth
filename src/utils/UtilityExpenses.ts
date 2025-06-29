@@ -26,3 +26,15 @@ export async function fetchUtilityExpenses(): Promise<UtilityExpense[]> {
     amount: Number(row.amount),
   }));
 }
+
+export async function fetchTotalUtilityExpensesAmount(): Promise<number> {
+  const { data, error } = await supabase
+    .from('utility_expenses')
+    .select('amount');
+
+  if (error) {
+    console.error('Error fetching total utility expenses amount:', error);
+    return 0;
+  }
+  return (data ?? []).reduce((sum, row) => sum + Number(row.amount), 0);
+}

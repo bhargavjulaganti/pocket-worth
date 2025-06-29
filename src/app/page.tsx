@@ -5,16 +5,26 @@ import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
 import { PassiveBloom, PassiveBloomRow } from "../utils/PassiveBloom";
 import Link from "next/link";
-import { DividendWithSymbol } from "../utils/DividendData";
-import { fetchUtilityExpenses, UtilityExpense } from "../utils/UtilityExpenses";
+// import { DividendWithSymbol, fetchTotalDividendAmount } from "../utils/DividendData";
+import { fetchUtilityExpenses, UtilityExpense, fetchTotalUtilityExpensesAmount } from "../utils/UtilityExpenses";
 import { UtilityPivot } from "../utils/UtilityPivot";
-import { fetchDividendIncome, DividendIncome, DividendIncomePivot } from "../utils/DividendIncome";
+import { fetchDividendIncome, DividendIncome, DividendIncomePivot, fetchTotalDividendIncomeAmount } from "../utils/DividendIncome";
+import { DividendCoverageChart } from "./components/DividendCoverageChart";
 
 export default function Home() {
 
   // PassiveBloom state and fetch
   const [passiveBloomRows, setPassiveBloomRows] = useState<PassiveBloomRow[]>([]);
   const [pbError, setPbError] = useState<string | null>(null);
+
+  // const [totalDividendAmount, setTotalDividendAmount] = useState<number>(0);
+  const [totalUtilityExpensesAmount, setTotalUtilityExpensesAmount] = useState<number>(0);
+  const [totalDividendIncomeAmount, setTotalDividendIncomeAmount] = useState<number>(0);
+
+  useEffect(() => {
+    fetchTotalDividendIncomeAmount().then(setTotalDividendIncomeAmount);
+    fetchTotalUtilityExpensesAmount().then(setTotalUtilityExpensesAmount);
+  }, []);
 
   useEffect(() => {
     PassiveBloom.getAll()
@@ -23,7 +33,7 @@ export default function Home() {
   }, []);
 
   // Supabase dividends with symbol state
-  const [dividends] = useState<DividendWithSymbol[]>([]);
+  // const [dividends] = useState<DividendWithSymbol[]>([]);
   
 
 
@@ -72,12 +82,12 @@ export default function Home() {
 
 
   // Build pivot data: { [symbol]: { [month]: amount } }
-  const pivotData: Record<string, Record<string, number>> = {};
-  dividends.forEach((div) => {
-    const symbol = div.stock_symbol;
-    if (!pivotData[symbol]) pivotData[symbol] = {};
-    pivotData[symbol][div.month] = Number(div.amount);
-  });
+  // const pivotData: Record<string, Record<string, number>> = {};
+  // dividends.forEach((div) => {
+  //   const symbol = div.stock_symbol;
+  //   if (!pivotData[symbol]) pivotData[symbol] = {};
+  //   pivotData[symbol][div.month] = Number(div.amount);
+  // });
 
   // --- Pivot dividend income data for month-wise table ---
   const dividendIncomeMonthsOrder = DividendIncomePivot.monthsOrder;
@@ -86,7 +96,6 @@ export default function Home() {
   const dividendIncomeMonthTotals = DividendIncomePivot.getMonthTotals(dividendIncomePivotData, dividendIncomeCategories);
 
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
@@ -109,6 +118,31 @@ export default function Home() {
     return null; // Will redirect to /login
   }
 
+  // Calculate percentage covered and down (using dividend_income)
+  const percentCovered = totalUtilityExpensesAmount > 0
+    ? Math.min((totalDividendIncomeAmount / totalUtilityExpensesAmount) * 100, 100)
+    : 0;
+  const percentDown = 100 - percentCovered;
+
+  // Prepare monthlyData for the donut/timeline chart
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const monthlyData = months.map((month) => {
+    const dividend = dividendIncome.reduce((sum, row) => {
+      const date = new Date(row.create_date);
+      const m = date.toLocaleString("en-US", { month: "long" });
+      return m === month ? sum + row.amount : sum;
+    }, 0);
+    const utility = utilityExpenses.reduce((sum, row) => {
+      const date = new Date(row.create_date);
+      const m = date.toLocaleString("en-US", { month: "long" });
+      return m === month ? sum + row.amount : sum;
+    }, 0);
+    return { month, dividend, utility };
+  });
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       {/* Logout link at top right */}
@@ -117,7 +151,24 @@ export default function Home() {
           Logout
         </Link>
       </div>
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-[64px] row-start-3 items-center sm:items-start">
+        <div>
+          <div className="flex flex-row items-center gap-10 my-4">
+            {/* <div>
+              <div className="text-lg font-bold">
+                Total Dividend Income Amount: {totalDividendIncomeAmount.toFixed(2)}
+              </div>
+              <div className="text-lg font-bold">
+                Total Utility Expenses Amount: {totalUtilityExpensesAmount.toFixed(2)}
+              </div>
+            </div> */}
+            <div className="ml-16">
+              <DividendCoverageChart percentCovered={percentCovered} percentDown={percentDown} monthlyData={monthlyData} />
+            </div>
+          </div>
+        </div>
+
+
         {/* Utility Expenses by Month - move to top */}
         <div className="w-full flex justify-center">
           <div>
