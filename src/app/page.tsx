@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../utils/firebaseConfig";
@@ -13,6 +13,7 @@ import { DividendCoverageChart } from "./components/DividendCoverageChart";
 import DividendTable from "./components/DividendTable";
 import UtilityTable from "./components/UtilityTable";
 import PassiveBloomTable from "./components/PassiveBloomTable";
+import LogoutPopup from "./components/LogoutPopup";
 
 export default function Home() {
 
@@ -115,6 +116,62 @@ export default function Home() {
   const [dividendCardMinimized, setDividendCardMinimized] = useState(true);
   const [utilityCardMinimized, setUtilityCardMinimized] = useState(true);
 
+  // Inactivity logout state and refs
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(30);
+  const logoutTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const INACTIVITY_LIMIT = 1 * 60 * 1000; // 1 minute
+  const POPUP_DURATION = 30; // seconds
+
+  // Logout function
+  const handleLogout = () => {
+    window.location.href = "/logout";
+  };
+
+  // Reset inactivity timer
+  const resetInactivityTimer = () => {
+    if (logoutTimeoutRef.current) clearTimeout(logoutTimeoutRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setShowLogoutPopup(false);
+    // Set timer for inactivity
+    logoutTimeoutRef.current = setTimeout(() => {
+      setShowLogoutPopup(true);
+      setSecondsLeft(POPUP_DURATION);
+      // Start countdown for popup (auto logout after 30s if no action)
+      countdownIntervalRef.current = setInterval(() => {
+        setSecondsLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownIntervalRef.current!);
+            handleLogout(); // Auto logout if no action
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }, INACTIVITY_LIMIT - POPUP_DURATION * 1000);
+  };
+
+  // Listen for user activity
+  useEffect(() => {
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
+    const activityHandler = resetInactivityTimer;
+    events.forEach((event) => window.addEventListener(event, activityHandler));
+    resetInactivityTimer();
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, activityHandler));
+      if (logoutTimeoutRef.current) clearTimeout(logoutTimeoutRef.current);
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    };
+  }, []);
+
+  // Stay logged in handler
+  const handleStayLoggedIn = () => {
+    setShowLogoutPopup(false);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    resetInactivityTimer();
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -150,6 +207,8 @@ export default function Home() {
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      {/* Logout Popup */}
+      <LogoutPopup open={showLogoutPopup} onStay={handleStayLoggedIn} onLogout={handleLogout} secondsLeft={secondsLeft} />
       {/* Logout link at top right */}
       <div className="w-full flex justify-end absolute top-4 right-8 z-10">
         <Link href="/logout" className="text-green-700 underline hover:text-green-900 font-semibold">
