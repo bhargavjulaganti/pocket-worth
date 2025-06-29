@@ -17,7 +17,7 @@ export function DividendCoverageChart({
   percentDown,
   monthlyData,
 }: DividendCoverageChartProps) {
-  const [showTooltip, setShowTooltip] = useState(false);
+  // const [showTooltip, setShowTooltip] = useState(false);
   // Animated progress state
   const [animatedPercent, setAnimatedPercent] = useState(percentCovered);
   const requestRef = useRef<number | null>(null);
