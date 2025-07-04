@@ -50,20 +50,17 @@ export function DividendCoverageChart({
   }, [percentCovered]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full px-2">
-      <div className="flex flex-col items-center w-full max-w-full sm:max-w-md md:max-w-3xl justify-center mx-auto">
-        <div className="mb-1 text-sm text-gray-700 dark:text-gray-200 font-semibold text-center">
+    <div className="flex flex-col items-center justify-center w-full min-h-[220px] px-2">
+      <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto">
+        <div className="mb-2 text-lg text-gray-700 dark:text-gray-200 font-semibold text-center">
           Progress Thermometer
         </div>
-        <div
-          className="relative w-full p-2 sm:p-4 rounded-2xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-md shadow-lg border border-white/20 dark:border-gray-700 flex flex-col items-center"
-          style={{ marginLeft: 'auto', marginRight: 'auto' }}
-        >
-          <div className="w-full flex flex-col sm:flex-row items-center gap-2">
+        <div style={{ paddingRight: "26rem" }} className="relative w-full p-4 rounded-2xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-md shadow-lg border border-white/20 dark:border-gray-700 flex flex-col items-center mx-auto">
+          <div className="w-full flex flex-col sm:flex-row items-center gap-4 justify-center">
             {/* Progress Bar */}
-            <div className="relative w-full sm:flex-1 h-5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden mb-2 sm:mb-0">
+            <div className="relative w-full sm:flex-1 h-8 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden mb-3 sm:mb-0">
               <div
-                className={`absolute left-0 top-0 h-5 rounded-full transition-all duration-500 ${
+                className={`absolute left-0 top-0 h-8 rounded-full transition-all duration-500 ${
                   animatedPercent >= 100
                     ? 'bg-green-500'
                     : animatedPercent >= 80
@@ -77,7 +74,7 @@ export function DividendCoverageChart({
             </div>
             {/* Pill-style Percentage Badge */}
             <div
-              className={`ml-0 sm:ml-2 px-3 py-1 rounded-full text-xs font-semibold shadow-md border border-white/30 dark:border-gray-700 transition-colors duration-300 ${
+              className={`ml-0 sm:ml-4 px-5 py-2 rounded-full text-base font-bold shadow-md border border-white/30 dark:border-gray-700 transition-colors duration-300 ${
                 animatedPercent >= 100
                   ? 'bg-green-500 text-white'
                   : animatedPercent >= 80
@@ -90,12 +87,12 @@ export function DividendCoverageChart({
             </div>
           </div>
           {/* Min/Max Labels */}
-          <div className="flex justify-between w-full mt-1 px-1">
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">0%</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">100%</span>
+          <div className="flex justify-between w-full mt-2 px-1">
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">0%</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">100%</span>
           </div>
           {/* Caption for Remaining Amount */}
-          <div className="mt-2 text-xs font-medium text-center">
+          <div className="mt-4 text-sm font-medium text-center">
             {percentDown > 0 ? (
               <span className="text-blue-600 dark:text-blue-300">
                 {`$${((percentDown / 100) * monthlyData.reduce((sum, d) => sum + d.utility, 0)).toLocaleString(undefined, { maximumFractionDigits: 0 })} left to reach your goal`}
