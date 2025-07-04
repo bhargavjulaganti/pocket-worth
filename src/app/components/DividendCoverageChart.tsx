@@ -50,18 +50,18 @@ export function DividendCoverageChart({
   }, [percentCovered]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full">
-      <div className="flex flex-col items-center w-full max-w-md sm:max-w-3xl justify-center mx-auto">
+    <div className="flex flex-col items-center justify-center w-full px-2">
+      <div className="flex flex-col items-center w-full max-w-full sm:max-w-md md:max-w-3xl justify-center mx-auto">
         <div className="mb-1 text-sm text-gray-700 dark:text-gray-200 font-semibold text-center">
           Progress Thermometer
         </div>
         <div
-          className="relative w-full p-4 rounded-2xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-md shadow-lg border border-white/20 dark:border-gray-700 flex flex-col items-center"
+          className="relative w-full p-2 sm:p-4 rounded-2xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-md shadow-lg border border-white/20 dark:border-gray-700 flex flex-col items-center"
           style={{ marginLeft: 'auto', marginRight: 'auto' }}
         >
-          <div className="w-full flex items-center gap-2">
+          <div className="w-full flex flex-col sm:flex-row items-center gap-2">
             {/* Progress Bar */}
-            <div className="relative flex-1 h-5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+            <div className="relative w-full sm:flex-1 h-5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden mb-2 sm:mb-0">
               <div
                 className={`absolute left-0 top-0 h-5 rounded-full transition-all duration-500 ${
                   animatedPercent >= 100
@@ -77,7 +77,7 @@ export function DividendCoverageChart({
             </div>
             {/* Pill-style Percentage Badge */}
             <div
-              className={`ml-2 px-3 py-1 rounded-full text-xs font-semibold shadow-md border border-white/30 dark:border-gray-700 transition-colors duration-300 ${
+              className={`ml-0 sm:ml-2 px-3 py-1 rounded-full text-xs font-semibold shadow-md border border-white/30 dark:border-gray-700 transition-colors duration-300 ${
                 animatedPercent >= 100
                   ? 'bg-green-500 text-white'
                   : animatedPercent >= 80
