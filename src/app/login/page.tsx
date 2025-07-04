@@ -1,5 +1,9 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { signInWithGoogle } from '../../utils/googleAuth';
+import { useRouter } from 'next/navigation';
+import { auth } from '../../utils/firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 interface Particle {
   x: number;
@@ -19,25 +23,19 @@ interface MousePosition {
   y: number;
 }
 
-interface AnimatedLoginPageProps {
-  onGoogleSignIn?: () => Promise<void>;
-  onEmailSignIn?: (email: string, password: string) => Promise<void>;
-}
-
-const AnimatedLoginPage: React.FC<AnimatedLoginPageProps> = ({ 
-  onGoogleSignIn, 
-  onEmailSignIn 
-}) => {
+const AnimatedLoginPage: React.FC = () => {
+  const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const [mousePos, setMousePos] = useState<MousePosition>({ x: 0, y: 0 });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const animationIdRef = useRef<number>();
+  const animationIdRef = useRef<number | null>(null);
 
   // Initialize particles with enhanced colors
   const initParticles = useCallback(() => {
@@ -219,13 +217,8 @@ const AnimatedLoginPage: React.FC<AnimatedLoginPageProps> = ({
     setError(null);
     
     try {
-      if (onEmailSignIn) {
-        await onEmailSignIn(email, password);
-      } else {
-        // Fallback simulation if no handler provided
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        console.log('Login attempt:', { email, password });
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
     } finally {
@@ -234,16 +227,14 @@ const AnimatedLoginPage: React.FC<AnimatedLoginPageProps> = ({
   };
 
   const handleGoogleLogin = async () => {
-    if (!onGoogleSignIn) {
-      console.log('Google login handler not provided');
-      return;
-    }
-
     setIsGoogleLoading(true);
     setError(null);
     
     try {
-      await onGoogleSignIn();
+      const user = await signInWithGoogle();
+      console.log('Google sign-in successful:', user);
+      // Redirect to main page after successful login
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed. Please try again.');
     } finally {
@@ -305,12 +296,28 @@ const AnimatedLoginPage: React.FC<AnimatedLoginPageProps> = ({
                 
                 <div className="relative group">
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-4 bg-slate-700/50 border border-slate-500/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 hover:bg-slate-700/70 hover:border-slate-400/60"
+                    className="w-full px-4 py-4 pr-12 bg-slate-700/50 border border-slate-500/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 hover:bg-slate-700/70 hover:border-slate-400/60"
                     placeholder="Password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-amber-400 transition-colors duration-200 focus:outline-none focus:text-amber-400"
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500/0 via-yellow-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:via-yellow-500/5 group-hover:to-amber-500/5 transition-all duration-300 pointer-events-none" />
                 </div>
                 
@@ -375,14 +382,14 @@ const AnimatedLoginPage: React.FC<AnimatedLoginPageProps> = ({
                 </button>
               </div>
               
-              <div className="mt-8 text-center">
+              {/* <div className="mt-8 text-center">
                 <p className="text-slate-400 text-sm">
                   Don't have an account?{' '}
                   <button className="text-amber-400 hover:text-amber-300 font-semibold transition-colors duration-200">
                     Sign up
                   </button>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -391,4 +398,9 @@ const AnimatedLoginPage: React.FC<AnimatedLoginPageProps> = ({
   );
 };
 
-export default AnimatedLoginPage;
+// Default page component for Next.js
+const LoginPage: React.FC = () => {
+  return <AnimatedLoginPage />;
+};
+
+export default LoginPage;
