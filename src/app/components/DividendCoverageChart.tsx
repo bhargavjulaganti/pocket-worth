@@ -23,6 +23,11 @@ export function DividendCoverageChart({
   const requestRef = useRef<number | null>(null);
   const prevPercentRef = useRef(percentCovered);
 
+  function getAmountLeft(percentDown: number, monthlyData: MonthlyDatum[]) {
+    const totalUtility = monthlyData.reduce((sum, d) => sum + d.utility, 0);
+    return ((percentDown / 100) * totalUtility).toLocaleString(undefined, { maximumFractionDigits: 0 });
+  }
+
   useEffect(() => {
     let start: number | null = null;
     const duration = 700; // ms
@@ -101,7 +106,7 @@ export function DividendCoverageChart({
           <div className="mt-6 text-m font-medium text-center w-full" >
             <span style={{ right: '-14.5rem' }} className={`text-blue-600 dark:text-blue-300 whitespace-nowrap ${percentDown > 0 ? "" : "hidden"}`}>
               {percentDown > 0
-                ? `You need $${((percentDown / 100) * monthlyData.reduce((sum, d) => sum + d.utility, 0)).toLocaleString(undefined, { maximumFractionDigits: 0 })} more to fully cover expenses`
+                ? `You need $${getAmountLeft(percentDown, monthlyData)} more to fully cover expenses`
                 : null}
             </span>
             {percentDown <= 0 && (
