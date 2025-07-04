@@ -64,14 +64,14 @@ const TimeRangeForm: React.FC<TimeRangeFormProps> = ({
     const amount = calculateAmount(totalHours);
     
     // Create new time entry
-    const newEntry: TimeEntry = {
-      id: Date.now().toString(),
-      startTime: startDate,
-      endTime: endDate,
-      totalHours,
-      amount,
-      isPaid: false // New entries are unpaid by default
-    };
+    // const newEntry: TimeEntry = {
+    //   id: Date.now().toString(),
+    //   startTime: startDate,
+    //   endTime: endDate,
+    //   totalHours,
+    //   amount,
+    //   isPaid: false // New entries are unpaid by default
+    // };
     
     // Add to Supabase and update local state
     try {
