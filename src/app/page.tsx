@@ -14,6 +14,8 @@ import DividendTable from "./components/DividendTable";
 import UtilityTable from "./components/UtilityTable";
 import PassiveBloomTable from "./components/PassiveBloomTable";
 import LogoutPopup from "./components/LogoutPopup";
+import TimeRangeForm from "./components/TimeRangeForm";
+import TabPanel from "./components/TabPanel";
 
 export default function Home() {
 
@@ -172,6 +174,13 @@ export default function Home() {
     resetInactivityTimer();
   };
 
+  // Handle time range form submission
+  const handleTimeRangeSubmit = (startTime: Date, endTime: Date) => {
+    console.log('Time range selected:', { startTime, endTime });
+    // You can add logic here to filter your data based on the selected time range
+    // For example, filter dividendIncome, utilityExpenses, etc.
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -206,7 +215,7 @@ export default function Home() {
   });
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[auto] items-center justify-items-center min-h-screen p-4 pb-16 gap-8 sm:p-6 font-[family-name:var(--font-geist-sans)]">
       {/* Logout Popup */}
       <LogoutPopup open={showLogoutPopup} onStay={handleStayLoggedIn} onLogout={handleLogout} secondsLeft={secondsLeft} />
       {/* Logout link at top right */}
@@ -215,46 +224,63 @@ export default function Home() {
           Logout
         </Link>
       </div>
-      <main className="flex flex-col gap-[64px] row-start-3 items-center sm:items-start">
-        <div>
-          <div className="flex flex-row items-center gap-10 my-4">
-            <div className="ml-16">
-              <DividendCoverageChart percentCovered={percentCovered} percentDown={percentDown} monthlyData={monthlyData} />
-            </div>
-          </div>
-        </div>
+      <main className="flex flex-col gap-8 items-center w-full mt-8">
+        <TabPanel
+          className="w-full max-w-6xl mx-auto"
+          tabs={[
+            {
+              label: "Dashboard",
+              content: (
+                <>
+                  {/* Dividend Coverage Chart */}
+                  <div className="flex flex-row items-center justify-center mb-8">
+                    <DividendCoverageChart 
+                      percentCovered={percentCovered} 
+                      percentDown={percentDown} 
+                      monthlyData={monthlyData} 
+                    />
+                  </div>
 
+                  {/* Utility Expenses and Dividend Tables */}
+                  <div className="w-full flex flex-col lg:flex-row gap-4 justify-center my-8 overflow-x-auto">
+                    <UtilityTable
+                      minimized={utilityCardMinimized}
+                      onToggle={() => setUtilityCardMinimized((prev) => !prev)}
+                      total={totalUtilityExpensesAmount}
+                      categories={utilityCategories}
+                      monthsOrder={utilityMonthsOrder}
+                      pivotData={utilityPivotData}
+                      monthTotals={utilityMonthTotals}
+                    />
+                    <DividendTable
+                      minimized={dividendCardMinimized}
+                      onToggle={() => setDividendCardMinimized((prev) => !prev)}
+                      total={totalDividendIncomeAmount}
+                      categories={dividendIncomeCategories}
+                      monthsOrder={dividendIncomeMonthsOrder}
+                      pivotData={dividendIncomePivotData}
+                    />
+                  </div>
 
-        {/* Utility Expenses Modern Card with Minimize/Maximize */}
-        {/* Dividend and Utility Tables Side by Side */}
-        <div className="w-full flex flex-col lg:flex-row gap-8 justify-center mt-8">
-          <UtilityTable
-            minimized={utilityCardMinimized}
-            onToggle={() => setUtilityCardMinimized((prev) => !prev)}
-            total={totalUtilityExpensesAmount}
-            categories={utilityCategories}
-            monthsOrder={utilityMonthsOrder}
-            pivotData={utilityPivotData}
-            monthTotals={utilityMonthTotals}
-          />
-          <DividendTable
-            minimized={dividendCardMinimized}
-            onToggle={() => setDividendCardMinimized((prev) => !prev)}
-            total={totalDividendIncomeAmount}
-            categories={dividendIncomeCategories}
-            monthsOrder={dividendIncomeMonthsOrder}
-            pivotData={dividendIncomePivotData}
-          />
-        </div>
-
-        {/* PassiveBloom Table - move to bottom */}
-        <PassiveBloomTable rows={passiveBloomRows} error={pbError} />
-
+                  {/* PassiveBloom Table */}
+                  <div className="mt-8 overflow-x-auto">
+                    <PassiveBloomTable rows={passiveBloomRows} error={pbError} />
+                  </div>
+                </>
+              ),
+            },
+            {
+              label: "Filters",
+              content: (
+                <div className="p-4">
+                  <TimeRangeForm onSubmit={handleTimeRangeSubmit} />
+                </div>
+              ),
+            },
+          ]}
+        />
       </main>
-      {/* Remove the logout link from the footer */}
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        {/* (No logout link here) */}
-      </footer>
+      {/* Footer removed to eliminate extra space */}
     </div>
   );
 }

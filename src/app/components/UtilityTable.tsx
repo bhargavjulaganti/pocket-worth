@@ -11,7 +11,7 @@ interface UtilityTableProps {
 }
 
 const UtilityTable: React.FC<UtilityTableProps> = ({ minimized, onToggle, total, categories, monthsOrder, pivotData, monthTotals }) => (
-  <div className="bg-gray-900 rounded-2xl shadow-lg p-6 w-full max-w-3xl border border-gray-800 relative">
+  <div className="bg-gray-900 rounded-2xl shadow-lg p-4 w-full lg:w-1/2 border border-gray-800 relative">
     {/* Minimize/Maximize Button */}
     <button
       onClick={onToggle}
@@ -48,22 +48,22 @@ const UtilityTable: React.FC<UtilityTableProps> = ({ minimized, onToggle, total,
     {/* Divider (hide if minimized) */}
     {!minimized && <hr className="my-4 border-gray-700" />}
     {/* Table always visible */}
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto max-w-full">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-gray-800 text-gray-300">
-            <th className="text-left p-3 font-medium">Category</th>
+            <th className="text-left p-2 font-medium">Category</th>
             {monthsOrder.map((month) => (
-              <th key={month} className="text-center p-3 font-medium">{month.slice(0, 3)}</th>
+              <th key={month} className="text-center p-2 font-medium">{month.slice(0, 3)}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {categories.map((category) => (
             <tr key={category} className="border-b border-gray-800">
-              <td className="p-3 font-medium text-gray-100">{category}</td>
+              <td className="p-2 font-medium text-gray-100">{category}</td>
               {monthsOrder.map((month) => (
-                <td key={month} className="p-3 text-center text-gray-200">
+                <td key={month} className="p-2 text-center text-gray-200">
                   {pivotData[category][month] && pivotData[category][month] > 0
                     ? `$${pivotData[category][month].toFixed(0)}`
                     : "-"}
