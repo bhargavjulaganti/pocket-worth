@@ -35,7 +35,7 @@ export async function fetchTotalDividendIncomeAmount(): Promise<number> {
     console.error('Error fetching total dividend income amount:', error);
     return 0;
   }
-  return (data ?? []).reduce((sum, row) => sum + Number(row.amount), 0);
+  return Number((data ?? []).reduce((sum, row) => sum + Number(row.amount), 0).toFixed(2));
 }
 
 export class DividendIncomePivot {

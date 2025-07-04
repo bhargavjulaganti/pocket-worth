@@ -38,7 +38,7 @@ const DividendTable: React.FC<DividendTableProps> = ({ minimized, onToggle, tota
           {categories.map((category) => (
             <div key={category} className="flex justify-between w-56">
               <span className="text-gray-100 font-medium">{category}</span>
-              <span className="text-green-400 font-semibold">${pivotData[category] ? Object.values(pivotData[category]).reduce((sum, v) => sum + (v || 0), 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}</span>
+              <span className="text-green-400 font-semibold">${pivotData[category] ? Object.values(pivotData[category]).reduce((sum, v) => sum + (v || 0), 0).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0'}</span>
             </div>
           ))}
         </div>
@@ -64,7 +64,7 @@ const DividendTable: React.FC<DividendTableProps> = ({ minimized, onToggle, tota
               {monthsOrder.map((month) => (
                 <td key={month} className="p-3 text-center text-gray-200">
                   {pivotData[category][month] && pivotData[category][month] > 0
-                    ? `$${pivotData[category][month].toFixed(0)}`
+                    ? `$${pivotData[category][month].toFixed(2)}`
                     : "-"}
                 </td>
               ))}

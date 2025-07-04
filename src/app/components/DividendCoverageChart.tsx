@@ -51,12 +51,12 @@ export function DividendCoverageChart({
 
   return (
     <div className="flex flex-col items-center justify-center w-full">
-      <div className="flex flex-col items-center min-w-[24rem] w-full max-w-3xl justify-center mx-auto">
+      <div className="flex flex-col items-center w-full max-w-md sm:max-w-3xl justify-center mx-auto">
         <div className="mb-1 text-sm text-gray-700 dark:text-gray-200 font-semibold text-center">
           Progress Thermometer
         </div>
         <div
-          className="relative w-full max-w-3xl p-4 rounded-2xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-md shadow-lg border border-white/20 dark:border-gray-700 flex flex-col items-center"
+          className="relative w-full p-4 rounded-2xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-md shadow-lg border border-white/20 dark:border-gray-700 flex flex-col items-center"
           style={{ marginLeft: 'auto', marginRight: 'auto' }}
         >
           <div className="w-full flex items-center gap-2">
