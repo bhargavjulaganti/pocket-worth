@@ -4,6 +4,7 @@ import { signInWithGoogle } from '../../utils/googleAuth';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../utils/firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { EmailValidator } from './ValidateEmail';
 
 interface Particle {
   x: number;
@@ -35,6 +36,7 @@ const AnimatedLoginPage: React.FC = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [emailError, setEmailError] = useState<string | null>(null);
   const animationIdRef = useRef<number | null>(null);
 
   // Initialize particles with enhanced colors
@@ -242,6 +244,12 @@ const AnimatedLoginPage: React.FC = () => {
     }
   };
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    setEmailError(EmailValidator.validateEmail(value));
+  };
+
   if (dimensions.width === 0 || dimensions.height === 0) {
     return <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 flex items-center justify-center">
       <div className="text-emerald-300">Loading...</div>
@@ -287,11 +295,18 @@ const AnimatedLoginPage: React.FC = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     className="w-full px-4 py-4 bg-slate-700/50 border border-slate-500/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 hover:bg-slate-700/70 hover:border-slate-400/60"
                     placeholder="Email address"
+                    aria-invalid={!!emailError}
+                    aria-describedby="email-error"
                   />
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500/0 via-yellow-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:via-yellow-500/5 group-hover:to-amber-500/5 transition-all duration-300 pointer-events-none" />
+                  {emailError && (
+                    <div id="email-error" className="mt-2 text-red-400 text-xs">
+                      {emailError}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="relative group">
